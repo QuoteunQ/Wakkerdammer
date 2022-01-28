@@ -1,0 +1,49 @@
+Big things: 
+
+Day voting 
+
+FINISHED Make one gamestate variable (setup/night/witch/day/voting/prenight)
+
+dead people gc
+
+Smaller things:
+
+Town square channel required 
+ - Make town square if not exists
+
+Custom death texts for each role
+
+Wolf voting:
+- who votes for who --> prevent double votes
+- when the gamemaster cuts off the voting 
+
+space in nickname should be prevented
+unique nicknames should be required
+
+check if lovers are the same players? 
+
+check if more than 1 of each role (certain roles?)
+
+stop witch from killing during day round (fixed?)
+add witch actions in newmute (fixed?)
+
+PICKING doesnt work --> permissions, add to GC
+- ww vote and then pick?
+
+ 
+
+
+
+Here some info about what happens in all edgecases:
+
+
+- Witch cannot heal a mutilation
+
+Edgecases TOCHECK: 
+
+- GM end night before any ww votes
+- Pick after the vote is decided
+  - the picked tries to vote then? 
+
+
+  
