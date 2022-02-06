@@ -2,19 +2,10 @@ import os
 import discord
 import requests
 import json
-from game_class import ww_game
+from classes import ww_game
+from static_variables import client, min_players, possible_roles, gskey
 
 
-# ---------------------------------- Static variables -----------------------------------------------------
-intents = discord.Intents.default()
-intents.members = True
-client = discord.Client(intents=intents)
-
-min_players = 1
-possible_roles = {'werewolf', 'picky_werewolf', 'cupid', 'kidnapper', 'protector', 'seer', 'witch', 'hunter', 'elder', 'fool', 'civilian'}
-kill_first = False          # If False, wolves mutilate on first night
-lovers_on_night_1 = True
-gskey =  {0:'setup', 1:'night: pre-wolves', 2:'night: wolves', 3:'night: witch', 4:'day: hunter', 5:'day: discussion', 6:'day: voting'}
 games = {}                  # dict with < guild_id : game object >
 
 
