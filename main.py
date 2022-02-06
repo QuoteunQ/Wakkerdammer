@@ -6,7 +6,7 @@ from classes import ww_game
 from static_variables import client, min_players, possible_roles, gskey
 
 
-games = {}                  # dict with < guild_id : game object >
+games: 'dict[int, ww_game]' = {}                  # dict with < guild_id : game object >
 
 
 

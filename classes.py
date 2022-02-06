@@ -7,24 +7,24 @@ from Topics import topics
 class ww_game():
     def __init__(self, guild: discord.Guild, gm: discord.Member):
         """A game is initialised using the guild object where the game was started and the member object of whoever started the game, who becomes the gamemaster."""
-        self.guild = guild                                                          # guild (server) object this game is running in
-        self.gm = gm                                                                # gamemaster member object
+        self.guild = guild                                                                              # guild (server) object this game is running in
+        self.gm = gm                                                                                    # gamemaster member object
         self.gamestate = 0
         self.night_count = 0
-        self.lobby = []                                                             # players that have typed $join
-        self.roles = []                                                             # roles included in this game (can have duplicates)
-        self.player_names_objs = {}                                                 # dict with < player display_name : player object >
-        self.player_roles_objs = {}                                                 # dict with < role (string) : [player objects] >
-        self.ids = {}                                                               # dict with < player display_name : playerid >
-        self.alive = set()                                                          # set of display_names of alive players
-        self.dead = set()                                                           # set of display_names of dead players
-        self.dead_this_night = set()                                                # set of display_names of players who are set to die at the end of this night
-        self.mute_this_night = set()                                                # set of display_names of players who are set to be muted at the end of this night
-        self.wolves = set()                                                         # set of ALIVE player names in the wolf team
-        self.town_square = discord.utils.get(guild.channels, name='town_square')    # the town_square text channel
-        self.wolf_channel = None                                                    # the wolf text channel
-        self.lovers_channel = None                                                  # the lovers text channel
-        self.gm_channel = None                                                      # text channel for gm for info about what's happening in the game
+        self.lobby = []                                                                                 # players that have typed $join
+        self.roles = []                                                                                 # roles included in this game (can have duplicates)
+        self.player_names_objs: 'dict[str, player]' = {}                                                # dict with < player display_name : player object >
+        self.player_roles_objs: 'dict[str, player]' = {}                                                # dict with < role (string) : [player objects] >
+        self.ids: 'dict[str, int]' = {}                                                                 # dict with < player display_name : playerid >
+        self.alive = set()                                                                              # set of display_names of alive players
+        self.dead = set()                                                                               # set of display_names of dead players
+        self.dead_this_night = set()                                                                    # set of display_names of players who are set to die at the end of this night
+        self.mute_this_night = set()                                                                    # set of display_names of players who are set to be muted at the end of this night
+        self.wolves = set()                                                                             # set of ALIVE player names in the wolf team
+        self.town_square: discord.TextChannel = discord.utils.get(guild.channels, name='town_square')   # the town_square text channel
+        self.wolf_channel: discord.TextChannel = None                                                   # the wolf text channel
+        self.lovers_channel: discord.TextChannel = None                                                 # the lovers text channel
+        self.gm_channel: discord.TextChannel = None                                                     # text channel for gm for info about what's happening in the game
 
 
     async def join(self, msg: discord.Message):
@@ -111,7 +111,7 @@ class ww_game():
         print("All channels deleted")
 
 
-    async def valid_target(self, msg: discord.Message, req_role: str, req_gs: int, req_target_count: int =1):
+    async def valid_target(self, msg: discord.Message, req_role: str, req_gs: int, req_target_count: int =1) -> bool:
         """Performs all checks to make sure a command message containing a (player) target is valid. This includes:
            - Is the message author alive
            - Was the right channel used for the command and does the author have the required role for the command. The <req_role> input is a role string which determines this.
@@ -239,12 +239,12 @@ class ww_game():
 # ----------------- Role classes -------------------------------
 class player():
     def __init__(self, game: ww_game, name: str):
-        self.game = game            # reference to the game object, to access game info from player
+        self.game = game                                 # reference to the game object, to access game info from player
         self.name = name
-        self.lover_names = []       # names of players this player is a lover with
+        self.lover_names = []                            # names of players this player is a lover with
         self.is_alive = True
         self.role = 'civilian'
-        self.role_channel = None    # the player's ROLE-SPECIFIC text channel
+        self.role_channel: discord.TextChannel = None    # the player's ROLE-SPECIFIC text channel
         self.wolf = False
         self.mutilated = False
 
