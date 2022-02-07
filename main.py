@@ -2,6 +2,7 @@ import os
 import discord
 import requests
 import json
+from textwrap import dedent
 from classes import ww_game
 from static_variables import client, min_players, possible_roles, gskey
 
@@ -59,17 +60,17 @@ async def on_message(message: discord.Message):
                 client.user: discord.PermissionOverwrite(read_messages=True)
             }
             new_game.gm_channel = await message.guild.create_text_channel(name='gamemaster', overwrites=overwritesgm)
-            await new_game.gm_channel.send("""
-            In this channel you as gamemaster will see updates about what's happening in the game.\n
-            You can also use it to start the game without revealing the roles in the game to the players.""")
+            await new_game.gm_channel.send(dedent("""
+            In this channel you as gamemaster will see updates about what's happening in the game.
+            You can also use it to start the game without revealing the roles in the game to the players."""))
             print("The gamemaster is {}".format(new_game.gm.display_name))
-            await town_square_channel.send("""
-            Starting game setup... \n
-            The gamemaster is {}.\n
-            To join the game, please type '$join' \n
-            Minimum {} players required to start the game \n
-            To start the game, the GM can type '$gamestart <role> <role>' etc...\n
-            Current roles in the game include: {}""".format(message.author.display_name, min_players, possible_roles))
+            await town_square_channel.send(dedent("""
+            Starting game setup... 
+            The gamemaster is {}.
+            To join the game, please type '$join'
+            Minimum {} players required to start the game
+            To start the game, the GM can type '$gamestart <role> <role>' etc...
+            Current roles in the game include: {}""".format(message.author.display_name, min_players, possible_roles)))
             games[message.guild.id] = new_game
 
 
@@ -183,15 +184,15 @@ async def on_message(message: discord.Message):
                             print("Players playing: {}, totalling {}".format(game.lobby, len(game.lobby)))
                             game.roles = roles
                             await game.distribute_roles()
-                            await game.gm_channel.send("""
-                            Game started! Players playing: {}, totalling {}.\n
-                            The wolves are {}.\n
-                            Ready for $beginnight !""".format(game.lobby, len(game.lobby), game.wolves))
+                            await game.gm_channel.send(dedent("""
+                            Game started! Players playing: {}, totalling {}.
+                            The wolves are {}.
+                            Ready for $beginnight !""".format(game.lobby, len(game.lobby), game.wolves)))
                             await game.town_square.send("Game started! Please check if you have been added to a text channel, and that you are clear on your role and how to play it")
 
             elif message.content.startswith('$gamereset'):
-                await game.delete_channels()
                 print("Guild {} is resetting their game.".format(message.guild.name))
+                await game.delete_channels()
                 town_square_channel = game.town_square
                 del games[message.guild.id]
                 await town_square_channel.send("Game reset!")

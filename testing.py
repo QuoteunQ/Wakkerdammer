@@ -1,7 +1,7 @@
 import discord
 import random
-#import main
 from Topics import topics
+import textwrap
 
 
 class ww_game():
@@ -379,3 +379,6 @@ role_switch_dict = {    # works like a factory for making the player objects in 
 
 
 # ------------ Testing ------------
+print(textwrap.dedent("""
+            Hello there\n
+            Nice to meet you"""))
