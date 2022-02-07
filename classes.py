@@ -105,9 +105,12 @@ class ww_game():
         for name in self.lobby:
             player = self.player_names_objs[name]
             await player.role_channel.delete()
-        await self.wolf_channel.delete()
-        await self.lovers_channel.delete()
-        await self.gm_channel.delete()
+        if self.wolf_channel:
+            await self.wolf_channel.delete()
+        if self.lovers_channel:
+            await self.lovers_channel.delete()
+        if self.gm_channel:
+            await self.gm_channel.delete()
         print("All channels deleted")
 
 
