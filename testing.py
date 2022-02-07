@@ -379,10 +379,3 @@ role_switch_dict = {    # works like a factory for making the player objects in 
 
 
 # ------------ Testing ------------
-game1 = ww_game(0, 'me')
-game1.lobby = ['Bram', 'Jasper']
-game1.roles = ['kidnapper', 'werewolf']
-game1.distribute_roles()
-playerB = game1.player_names_objs['Bram']
-playerJ = game1.player_names_objs['Jasper']
-print(playerB.name in playerB.at_home)
