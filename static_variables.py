@@ -5,7 +5,7 @@ intents.members = True
 client = discord.Client(intents=intents)
 
 min_players = 1
-possible_roles = {'werewolf', 'picky_werewolf', 'cupid', 'kidnapper', 'protector', 'seer', 'witch', 'hunter', 'elder', 'fool', 'civilian'}
+possible_roles = {'werewolf', 'picky werewolf', 'cupid', 'kidnapper', 'protector', 'seer', 'witch', 'hunter', 'elder', 'fool', 'civilian'}
 gskey =  {0:'setup', 1:'night: pre-wolves', 2:'night: wolves', 3:'night: witch', 4:'day: hunter', 5:'day: discussion', 6:'day: voting'}
 
 # Set specific settings for the games:

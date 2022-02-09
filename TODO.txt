@@ -9,12 +9,8 @@ Soon:
 Lynching
 - print statement and channel message in $lynch to make clear
   how many players have voted
-- player.lynch_vote
 
 Wolf voting
-- make lunch a class method
-- call wolf_kill when all wolves have voted or gamemaster decides to
-- increment gamestate in wolf_kill and send appropriate messages to gm
 - lover suicide method
 
 - Separate witch and hunter gamestates

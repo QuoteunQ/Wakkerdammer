@@ -33,18 +33,22 @@ async def on_message(message: discord.Message):
 
     if message.content.startswith('$hello'):
         await message.channel.send('Hello')
+        return
 
-    elif message.content.startswith('$inspire'):
+    if message.content.startswith('$inspire'):
         quote = get_quote()
         await message.channel.send(quote)
+        return
 
-    elif message.content.startswith('$help'):
+    if message.content.startswith('$help'):
         await message.channel.send("Commands: $inspire $gamesetup $join $leave $gamestart $playerlist $clearplayerlist $allroles $roles $setup? $gm $beginnight $action $endnight $beginvoting")
+        return
     
-    elif message.content.startswith('$allroles'):
+    if message.content.startswith('$allroles'):
         await message.channel.send(f"Current roles in the game include: {possible_roles}")
+        return
 
-    elif message.content.startswith('$gamesetup'):
+    if message.content.startswith('$gamesetup'):
         if message.guild.id in games.keys():
             await message.channel.send("Failed to start game setup: there's still a game running in this server!")
         else:
@@ -74,130 +78,118 @@ async def on_message(message: discord.Message):
                 f"Current roles in the game include: {possible_roles}"
             )
             games[message.guild.id] = new_game
+        return
 
 
 # --------------------------- Commands which do require a game taking place in the guild ---------------------------------------
-    else:
-        if message.guild.id not in games.keys():
-            await message.channel.send("There's no game running in this server yet!")
-            return
+    if message.guild.id not in games.keys():
+        await message.channel.send("There's no game running in this server yet!")
+        return
 
-        game = games[message.guild.id]
-
-
-    # ------------------------------------ Game join & leave ------------------------------------------
-
-        if message.content.startswith('$join'):
-            await game.join(message)
-
-        elif message.content.startswith('$leave'):
-            await game.leave(message)
+    game = games[message.guild.id]
 
 
-    # ---------------------------- Night Commands Players -----------------------------------
+# ------------------------------------ Game join & leave ------------------------------------------
 
-        elif message.content.startswith('$kidnap'):
-            if await game.valid_target(message, req_role='kidnapper', req_gs=1):
-                await game.player_names_objs[message.author.display_name].kidnap(message)
-        
-        elif message.content.startswith('$protect'):
-            if await game.valid_target(message, req_role='protector', req_gs=1):
-                await game.player_names_objs[message.author.display_name].protect(message)
+    if message.content.startswith('$join'):
+        await game.join(message)
+        return
 
-        elif message.content.startswith('$lovers'):
-            if await game.valid_target(message, req_role='cupid', req_gs=1, req_target_count=2):
-                await game.player_names_objs[message.author.display_name].make_lovers(message)
-
-        elif message.content.startswith('$sleepat'):
-            if await game.valid_target(message, req_role='cupid', req_gs=1):
-                await game.player_names_objs[message.author.display_name].sleep_at(message)
-
-        elif message.content.startswith('$lunch'):
-            if await game.valid_target(message, req_role='wolf', req_gs=2):
-                wolf_author = game.players_names_objs[message.author.display_name]
-                if wolf_author.kill_vote != '':      # if they've already voted
-                    await message.channel.send("You've already voted to kill someone tonight!")
-                else:
-                    target = message.content.split(' ')[1]
-                    wolf_author.kill_vote = target
-                    vote_count = len([wolf.kill_vote for wolf in game.wolves if wolf.kill_vote != ''])
-                    wolves_vote_msg = f"*** Wolves: {message.author.display_name} has voted to lunch {target}. {vote_count}/{len(game.wolves)} wolves have voted."
-                    await message.channel.send(wolves_vote_msg)
-                    await game.gm_channel.send(wolves_vote_msg)
-
-        elif message.content.startswith('$pick'):
-            if await game.valid_target(message, req_role='picky_werewolf', req_gs=1):
-                await game.player_names_objs[message.author.display_name].pick_wolf(message)
+    if message.content.startswith('$leave'):
+        await game.leave(message)
+        return
 
 
-    # ------------------------------ Utility commands -------------------------------------
+# ---------------------------- Night Commands Players -----------------------------------
 
-        elif message.content.startswith('$playerlist'):
-            await message.channel.send(f"Players: {game.lobby}")
-
-        elif message.content.startswith('$poopbreak'):
-            await message.channel.send("Aren't you a funnyman https://www.youtube.com/watch?v=DN0gAQQ7FAQ")
+    if message.content.startswith('$kidnap'):
+        if await game.valid_target(message, req_role='kidnapper', req_gs=1):
+            await game.player_names_objs[message.author.display_name].kidnap(message)
+        return
     
-        elif message.content.startswith('$roles'):
-            await message.channel.send(f"Roles included in this game are: {game.roles}")
+    if message.content.startswith('$protect'):
+        if await game.valid_target(message, req_role='protector', req_gs=1):
+            await game.player_names_objs[message.author.display_name].protect(message)
+        return
 
-        elif message.content.startswith('$gamestate'):
-            await message.channel.send(f"State of game: {gskey[game.gamestate]}")
+    if message.content.startswith('$lovers'):
+        if await game.valid_target(message, req_role='cupid', req_gs=1, req_target_count=2):
+            await game.player_names_objs[message.author.display_name].make_lovers(message)
+        return
 
-        elif message.content.startswith('$gm'):
-            await message.channel.send(f"Current GM is: {game.gm.display_name}")
+    if message.content.startswith('$sleepat'):
+        if await game.valid_target(message, req_role='cupid', req_gs=1):
+            await game.player_names_objs[message.author.display_name].sleep_at(message)
+        return
 
-        elif message.content.startswith('$alive'):
-            await message.channel.send(f"Alive players are: {game.alive}")
+    if message.content.startswith('$lunch'):
+        if await game.valid_target(message, req_role='wolf', req_gs=2):
+            await game.player_names_objs[message.author.display_name].vote_lunch(message)
+        return
+
+    if message.content.startswith('$pick'):
+        if await game.valid_target(message, req_role='picky werewolf', req_gs=1):
+            await game.player_names_objs[message.author.display_name].pick_wolf(message)
+        return
 
 
-    # ----------------------- Commands which can only be used by the gamemaster ------------------------------------
+# ------------------------------ Utility commands -------------------------------------
 
+    if message.content.startswith('$playerlist'):
+        await message.channel.send(f"Players: {game.lobby}")
+        return
+
+    if message.content.startswith('$poopbreak'):
+        await message.channel.send("Aren't you a funnyman https://www.youtube.com/watch?v=DN0gAQQ7FAQ")
+        return
+
+    if message.content.startswith('$roles'):
+        await message.channel.send(f"Roles included in this game are: {game.roles}")
+        return
+
+    if message.content.startswith('$gamestate'):
+        await message.channel.send(f"State of game: {gskey[game.gamestate]}")
+        return
+
+    if message.content.startswith('$gm'):
+        await message.channel.send(f"Current GM is: {game.gm.display_name}")
+        return
+
+    if message.content.startswith('$alive'):
+        await message.channel.send(f"Alive players are: {game.alive}")
+        return
+
+
+# ----------------------- Commands which can only be used by the gamemaster ------------------------------------
+
+    if message.author != game.gm:
+        await message.channel.send("Relax bro you're not the GM")
+        return
+
+    if message.content.startswith('$clearplayerlist'):
+        if game.gamestate == 0 and not len(game.alive):
+            game.lobby = []
+            game.ids = {}
+            await message.channel.send("Player list is now empty")
         else:
-            if message.author != game.gm:
-                await message.channel.send("Relax bro you're not the GM")
-                return
+            await message.channel.send("You can't do that outside of game setup")
+        return
 
-            if message.content.startswith('$clearplayerlist'):
-                if game.gamestate == 0 and not len(game.alive):
-                    game.lobby = []
-                    game.ids = {}
-                    await message.channel.send("Player list is now empty")
-                else:
-                    await message.channel.send("You can't do that outside of game setup")
+    if message.content.startswith('$gamestart'):
+        await game.start(message)
+        return
 
-            elif message.content.startswith('$gamestart'):
-                if game.gamestate != 0:
-                    await message.channel.send("No game setup taking place")
-                else:
-                    if len(game.lobby) < min_players:
-                        await message.channel.send("Insufficient players")
-                    else:
-                        roles = message.content.split(' ')[1:]
-                        for role in roles:
-                            if role not in possible_roles:
-                                await message.channel.send(f"Invalid role: '{role}', please try again")
-                                return				# end function
-                        if len(roles) != len(game.lobby):
-                            await message.channel.send(f"Mismatch between amounts of roles ({len(roles)}) & players ({game.lobby})")
-                        else:
-                            print("Starting game...\n"
-                                f"Included roles are: {roles}\n"
-                                f"Players playing: {game.lobby}, totalling {len(game.lobby)}")
-                            game.roles = roles
-                            await game.distribute_roles()
-                            await game.gm_channel.send(
-                                f"Game started! Players playing: {game.lobby}, totalling {len(game.lobby)}.\n"
-                                f"The wolves are {game.wolves}.\n"
-                                "Ready for $beginnight !")
-                            await game.town_square.send("Game started! Please check if you have been added to a text channel, and that you are clear on your role and how to play it.")
+    if message.content.startswith('$gamereset'):
+        print(f"Guild {message.guild.id} is resetting their game.")
+        await game.delete_channels()
+        town_square_channel = game.town_square
+        del games[message.guild.id]
+        await town_square_channel.send("Game reset!")
+        return
 
-            elif message.content.startswith('$gamereset'):
-                print(f"Guild {message.guild.id} is resetting their game.")
-                await game.delete_channels()
-                town_square_channel = game.town_square
-                del games[message.guild.id]
-                await town_square_channel.send("Game reset!")
+    if message.content.startswith('$endwolfvoting'):
+        await game.wolf_kill()
+        return
 
 
 
