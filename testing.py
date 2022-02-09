@@ -379,6 +379,9 @@ role_switch_dict = {    # works like a factory for making the player objects in 
 
 
 # ------------ Testing ------------
-print(textwrap.dedent("""
-            Hello there\n
-            Nice to meet you"""))
+message = ("hello \n"
+        "how are you \n"
+        "I'm good \n")
+
+
+print(message)

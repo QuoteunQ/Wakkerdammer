@@ -21,7 +21,7 @@ def get_quote():
 
 @client.event
 async def on_ready():
-    print("We have logged in as {0.user}".format(client))
+    print(f"We have logged in as {client.user}")
 
 
 @client.event
@@ -42,7 +42,7 @@ async def on_message(message: discord.Message):
         await message.channel.send("Commands: $inspire $gamesetup $join $leave $gamestart $playerlist $clearplayerlist $allroles $roles $setup? $gm $beginnight $action $endnight $beginvoting")
     
     elif message.content.startswith('$allroles'):
-        await message.channel.send("Current roles in the game include: {}".format(possible_roles))
+        await message.channel.send(f"Current roles in the game include: {possible_roles}")
 
     elif message.content.startswith('$gamesetup'):
         if message.guild.id in games.keys():
@@ -60,17 +60,19 @@ async def on_message(message: discord.Message):
                 client.user: discord.PermissionOverwrite(read_messages=True)
             }
             new_game.gm_channel = await message.guild.create_text_channel(name='gamemaster', overwrites=overwritesgm)
-            await new_game.gm_channel.send(dedent("""
-            In this channel you as gamemaster will see updates about what's happening in the game.
-            You can also use it to start the game without revealing the roles in the game to the players."""))
-            print("The gamemaster is {}".format(new_game.gm.display_name))
-            await town_square_channel.send(dedent("""
-            Starting game setup... 
-            The gamemaster is {}.
-            To join the game, please type '$join'
-            Minimum {} players required to start the game
-            To start the game, the GM can type '$gamestart <role> <role>' etc...
-            Current roles in the game include: {}""".format(message.author.display_name, min_players, possible_roles)))
+            await new_game.gm_channel.send(
+                "In this channel you as gamemaster will see updates about what's happening in the game.\n"
+                "You can also use it to start the game without revealing the roles in the game to the players."
+            )
+            print(f"The gamemaster is {new_game.gm.display_name}")
+            await town_square_channel.send(
+                "Starting game setup...\n"
+                f"The gamemaster is {new_game.gm.display_name}.\n"
+                "To join the game, please type '$join'\n"
+                f"Minimum {min_players} players required to start the game\n"
+                "To start the game, the GM can type '$gamestart <role> <role>' etc...\n"
+                f"Current roles in the game include: {possible_roles}"
+            )
             games[message.guild.id] = new_game
 
 
@@ -119,7 +121,7 @@ async def on_message(message: discord.Message):
                     target = message.content.split(' ')[1]
                     wolf_author.kill_vote = target
                     vote_count = len([wolf.kill_vote for wolf in game.wolves if wolf.kill_vote != ''])
-                    wolves_vote_msg = "*** Wolves: {} has voted to lunch {}. {}/{} wolves have voted".format(message.author.display_name, target, vote_count, len(game.wolves))
+                    wolves_vote_msg = f"*** Wolves: {message.author.display_name} has voted to lunch {target}. {vote_count}/{len(game.wolves)} wolves have voted."
                     await message.channel.send(wolves_vote_msg)
                     await game.gm_channel.send(wolves_vote_msg)
 
@@ -131,22 +133,22 @@ async def on_message(message: discord.Message):
     # ------------------------------ Utility commands -------------------------------------
 
         elif message.content.startswith('$playerlist'):
-            await message.channel.send("Players: {}".format(game.lobby))
+            await message.channel.send(f"Players: {game.lobby}")
 
         elif message.content.startswith('$poopbreak'):
             await message.channel.send("Aren't you a funnyman https://www.youtube.com/watch?v=DN0gAQQ7FAQ")
     
         elif message.content.startswith('$roles'):
-            await message.channel.send('Roles included in this game are: {}'.format(game.roles))
+            await message.channel.send(f"Roles included in this game are: {game.roles}")
 
         elif message.content.startswith('$gamestate'):
-            await message.channel.send("State of Game: {}".format(gskey[game.gamestate]))
+            await message.channel.send(f"State of game: {gskey[game.gamestate]}")
 
         elif message.content.startswith('$gm'):
-            await message.channel.send("Current GM is: {}".format(game.gm.display_name))
+            await message.channel.send(f"Current GM is: {game.gm.display_name}")
 
         elif message.content.startswith('$alive'):
-            await message.channel.send('Alive players are: {}'.format(game.alive))
+            await message.channel.send(f"Alive players are: {game.alive}")
 
 
     # ----------------------- Commands which can only be used by the gamemaster ------------------------------------
@@ -174,24 +176,24 @@ async def on_message(message: discord.Message):
                         roles = message.content.split(' ')[1:]
                         for role in roles:
                             if role not in possible_roles:
-                                await message.channel.send("Invalid role: '{}', please try again".format(role))
+                                await message.channel.send(f"Invalid role: '{role}', please try again")
                                 return				# end function
                         if len(roles) != len(game.lobby):
-                            await message.channel.send("Mismatch between amounts of roles ({}) & players ({})".format(len(roles), len(game.lobby)))
+                            await message.channel.send(f"Mismatch between amounts of roles ({len(roles)}) & players ({game.lobby})")
                         else:
-                            print("Starting game...")
-                            print("Included roles are: {}".format(roles))
-                            print("Players playing: {}, totalling {}".format(game.lobby, len(game.lobby)))
+                            print("Starting game...\n"
+                                f"Included roles are: {roles}\n"
+                                f"Players playing: {game.lobby}, totalling {len(game.lobby)}")
                             game.roles = roles
                             await game.distribute_roles()
-                            await game.gm_channel.send(dedent("""
-                            Game started! Players playing: {}, totalling {}.
-                            The wolves are {}.
-                            Ready for $beginnight !""".format(game.lobby, len(game.lobby), game.wolves)))
-                            await game.town_square.send("Game started! Please check if you have been added to a text channel, and that you are clear on your role and how to play it")
+                            await game.gm_channel.send(
+                                f"Game started! Players playing: {game.lobby}, totalling {len(game.lobby)}.\n"
+                                f"The wolves are {game.wolves}.\n"
+                                "Ready for $beginnight !")
+                            await game.town_square.send("Game started! Please check if you have been added to a text channel, and that you are clear on your role and how to play it.")
 
             elif message.content.startswith('$gamereset'):
-                print("Guild {} is resetting their game.".format(message.guild.name))
+                print(f"Guild {message.guild.id} is resetting their game.")
                 await game.delete_channels()
                 town_square_channel = game.town_square
                 del games[message.guild.id]

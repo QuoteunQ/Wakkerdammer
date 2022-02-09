@@ -1,49 +1,56 @@
-Big things: 
+Keep track of:
+- use display_name instead of nickname
+- gm channel msgs on role events
+- Every message needs a reply
 
-Day voting 
 
-FINISHED Make one gamestate variable (setup/night/witch/day/voting/prenight)
+Soon:
 
-dead people gc
+Lynching
+- print statement and channel message in $lynch to make clear
+  how many players have voted
+- player.lynch_vote
 
-Smaller things:
+Wolf voting
+- make lunch a class method
+- call wolf_kill when all wolves have voted or gamemaster decides to
+- increment gamestate in wolf_kill and send appropriate messages to gm
+- lover suicide method
 
-Town square channel required 
- - Make town square if not exists
+- Separate witch and hunter gamestates
+- send nightcount on night start to gm channel
+- send messages to roles telling them it’s their time to act
 
-Custom death texts for each role
+- Win condition function; called on every death
 
-Wolf voting:
-- who votes for who --> prevent double votes
-- when the gamemaster cuts off the voting 
+- check duplicate names in $join
+- check duplicate roles in $gamestart except for werewolf and civ
 
-space in nickname should be prevented
-unique nicknames should be required
 
-check if lovers are the same players? 
+At some point:
 
-check if more than 1 of each role (certain roles?)
+- dead people gc
+- on_member_update() to keep track of nickname changes; space in nickname should be prevented, unique nicknames should be required
+- on_user_update() to keep track of username changes
+- if player is mutilated, on status update check if they unmuted themselves, then remute them
+- in $leave : if in the middle of a game: “are you sure? This will kill you. If so, use $quit”
+- $remove to remove a player by the gm; same effect as $quit
+- GM can't use $join
+- Custom death texts for each role
 
-stop witch from killing during day round (fixed?)
-add witch actions in newmute (fixed?)
 
-PICKING doesnt work --> permissions, add to GC
-- ww vote and then pick?
 
  
-
-
-
-Here some info about what happens in all edgecases:
-
+Edgecases:
 
 - Witch cannot heal a mutilation
 
-Edgecases TOCHECK: 
-
+TOCHECK
 - GM end night before any ww votes
 - Pick after the vote is decided
   - the picked tries to vote then? 
 
 
-  
+Possibilities:
+- Automatic checks on whether all roles have performed their actions for a certain gs?
+- timer on voting

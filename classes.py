@@ -21,9 +21,9 @@ class ww_game():
         self.dead_this_night = set()                                                                    # set of display_names of players who are set to die at the end of this night
         self.mute_this_night = set()                                                                    # set of display_names of players who are set to be muted at the end of this night
         self.wolves = set()                                                                             # set of ALIVE player names in the wolf team
-        self.town_square: discord.TextChannel = discord.utils.get(guild.channels, name='town_square')   # the town_square text channel
-        self.wolf_channel: discord.TextChannel = None                                                   # the wolf text channel
-        self.lovers_channel: discord.TextChannel = None                                                 # the lovers text channel
+        self.town_square: discord.TextChannel = discord.utils.get(guild.channels, name='town_square')
+        self.wolf_channel: discord.TextChannel = None
+        self.lovers_channel: discord.TextChannel = None
         self.gm_channel: discord.TextChannel = None                                                     # text channel for gm for info about what's happening in the game
 
 
@@ -39,8 +39,8 @@ class ww_game():
             else:
                 self.lobby.append(name)
                 self.ids[name] = msg.author.id
-                print("{} has joined the game, playercount now at {}".format(name, len(self.lobby)))
-                await self.town_square.send("{} has joined the game, playercount now at {}".format(name, len(self.lobby)))
+                print(f"{name} has joined the game, playercount now at {self.lobby}")
+                await self.town_square.send(f"{name} has joined the game, playercount now at {self.lobby}")
 
     
     async def leave(self, msg: discord.Message):
@@ -52,8 +52,8 @@ class ww_game():
             if name in self.lobby:
                 self.lobby.remove(name)
                 del self.ids[name]
-                print("{} has left the game, playercount now at {}".format(name, len(self.lobby)))
-                await self.town_square.send("{} has left the game, playercount now at {}".format(name, len(self.lobby)))
+                print(f"{name} has left the game, playercount now at {self.lobby}")
+                await self.town_square.send(f"{name} has left the game, playercount now at {self.lobby}")
             else:
                 await msg.channel.send("No need, you weren't even in the game yet!")
 
@@ -75,7 +75,7 @@ class ww_game():
                 self.player_roles_objs[role].append(new_player)
             else:
                 self.player_roles_objs[role] = [new_player]
-            await self.gm_channel.send("{} is the {}".format(participant, role))
+            await self.gm_channel.send(f"{participant} is the {role}")
 
             # role-specific channels
             overwrites = {
@@ -158,12 +158,17 @@ class ww_game():
         targets = msg.content.split(' ')[1:]
         for target in targets:
             if target not in self.alive:
-                await msg.channel.send('The following target was not valid: {}. Please try again.'.format(target))
+                await msg.channel.send(f"The following target was not valid: {target}. Please try again.")
                 return False
 
         if len(targets) != req_target_count:
-            await msg.channel.send('This action requires {} target(s), but you provided {} target(s). Please try again.'.format(req_target_count, len(targets)))
+            await msg.channel.send(f"This action requires {req_target_count} target(s), but you provided {len(targets)} target(s). Please try again.")
             return False
+        
+        if len(targets) != len(set(targets)):   # the same name occurs more than once
+            await msg.channel.send("You provided the same name twice.")
+            return False
+
         else: return True
 
 
@@ -183,20 +188,20 @@ class ww_game():
         
         else:
             target = self.player_names_objs[max(wolf_votes, key=wolf_votes.get)]
-            await self.gm_channel.send("*** Wolves: {} is the lunch target".format(target.name))
-            await self.wolf_channel.send("{} is the lunch target".format(target.name))
+            await self.gm_channel.send(f"*** Wolves: {target.name} is the lunch target")
+            await self.wolf_channel.send(f"{target.name} is the lunch target")
 
             if target.house_prot:
-                await self.gm_channel.send("*** Wolves: the target's house is protected".format(target.name))
+                await self.gm_channel.send(f"*** Wolves: {target.name}'s house is protected")
             else:
                 for name in target.at_home:
                     player = self.player_names_objs[name]
                     if player.role == 'elder' and player.elder_prot:
                         player.elder_prot = False
-                        await self.gm_channel.send("*** Wolves: {} survived the attack because they are the elder".format(player.name))
+                        await self.gm_channel.send(f"*** Wolves: {player.name} survived the attack because they are the elder")
                     else:
                         self.dead_this_night.add(player.name)
-                        await self.gm_channel.send("*** Wolves: {} was killed by the wolves".format(player.name))
+                        await self.gm_channel.send(f"*** Wolves: {player.name} was killed by the wolves")
 
 
     async def handle_end_night(self):
@@ -209,15 +214,15 @@ class ww_game():
         await self.town_square.send("Dawn is on the horizon...")
 
         if len(self.dead_this_night) > 0 or len(self.mute_this_night) > 0:
-            result_str = 'Come morning, you find that:\n'
+            result_str = "Come morning, you find that:\n"
             for name in self.dead_this_night:
                 player = self.player_names_objs[name]
                 if player.role not in {'werewolf, picky_werewolf'} and player.wolf == True:
-                    result_str += "Last night {} died, they were the {}, and they were the picked werewolf.\n".format(name, player.role)
+                    result_str += f"Last night {name} died, they were the {player.role}, and they were the picked werewolf.\n"
                 else:
-                    result_str += "Last night {} died, they were the {}.\n".format(name, player.role)
+                    result_str += f"Last night {name} died, they were the {player.role}.\n"
             for name in self.mute_this_night:
-                result_str += "Last night {} was mutilated.\n".format(name)
+                result_str += f"Last night {name} was mutilated.\n"
         else:
             result_str = "Everyone wakes up to a calm morning."
         await self.town_square.send(result_str)
@@ -276,7 +281,7 @@ class player():
             lover.is_alive = False
             self.game.dead.add(lover.name)
             self.game.alive.remove(lover.name)
-            await self.game.town_square.send("{} tragically chooses to end their life after they find out that {} has died".format(lover.name, self.name))
+            await self.game.town_square.send(f"{lover.name} tragically chooses to end their life after they find out that {self.name} has died")
         
     async def mutilate(self):
         # maybe have it mute the player in the voice (and text?) channel(s)?
@@ -300,13 +305,13 @@ class kidnapper(player):
             else:
                 kidnappee = self.game.player_names_objs[name]
                 self.prev_target = name
-                await self.role_channel.send("You have set the kidnap target to be {}".format(name))
+                await self.role_channel.send(f"You have set the kidnap target to be {name}")
                 if kidnappee.name in kidnappee.at_home:
                     self.at_home.append(kidnappee.name)
                     kidnappee.at_home.remove(kidnappee.name)
-                    await self.game.gm_channel.send("*** Kidnapper: {} has succesfully kidnapped {}.".format(self.name, name))
+                    await self.game.gm_channel.send(f"*** Kidnapper: {self.name} has succesfully kidnapped {name}.")
                 else:
-                    await self.game.gm_channel.send("*** Kidnapper: {} failed to kidnap {} because they were not at home.".format(self.name, name))
+                    await self.game.gm_channel.send(f"*** Kidnapper: {self.name} failed to kidnap {name} because they were not at home.")
 
 
 class cupid(player):
@@ -327,13 +332,13 @@ class cupid(player):
             else:
                 host = self.game.player_names_objs[name]
                 self.prev_target = name
-                await self.role_channel.send("You have set your host target to be {}".format(name))
+                await self.role_channel.send(f"You have set your host target to be {name}")
                 if self.name in self.at_home:               # if cupid was not kidnapped before trying to sleep somewhere
                     self.at_home.remove(self.name)
                     host.at_home.append(self.name)
-                    await self.game.gm_channel.send("** Cupid: {} is sleeping at {}'s.".format(self.name, name))
+                    await self.game.gm_channel.send(f"*** Cupid: {self.name} is sleeping at {name}'s.")
                 else:
-                    await self.game.gm_channel.send("*** Cupid: {} failed to sleep at {} because cupid was not at home.".format(self.name, name))
+                    await self.game.gm_channel.send(f"*** Cupid: {self.name} failed to sleep at {name} because cupid was not at home.")
     
     async def make_lovers(self, msg: discord.Message):
         """Given a $lovers command message, make the players given by the names in the message lovers and create a secret channel for them."""
@@ -354,10 +359,9 @@ class cupid(player):
                 }
                 self.game.lovers_channel = await self.game.guild.create_text_channel(name='lovers', overwrites=overwrites, topic=topics['lovers'])
                 await self.role_channel.send("Lovers have been assigned and added to a lover channel.")
-                await self.game.lovers_channel.send("Welcome! You've been made lovers by our dear cupid. Feel free to get acquainted in this channel.")
-                await self.game.gm_channel.send("*** Cupid: {} has chosen {} and {} to be the lovers".format(self.name, name1, name2))
+                await self.game.gm_channel.send(f"*** Cupid: {self.name} has chosen {name1} and {name1} to be the lovers")
             else:
-                await self.role_channel.send("You've already chosen the lovers")
+                await self.role_channel.send("You've already chosen all the lovers")
         else:
             await self.role_channel.send("You can only choose lovers on the first night")
 
@@ -400,11 +404,11 @@ class picky_werewolf(werewolf):
             self.game.wolves.add(name)
             target.kill_vote = ''
             await self.game.wolf_channel.set_permissions(self.game.guild.get_member(self.game.ids[name]), read_messages=True)
-            await self.game.wolf_channel.send("{} has been picked and added to the groupchat".format(name))
+            await self.game.wolf_channel.send(f"{name} has been picked and added to the groupchat")
             self.charges -= 1
-            await self.game.gm_channel.send("*** Picky werewolf: {} has picked {} and they have been added to the wolves channel.".format(self.name, name))
+            await self.game.gm_channel.send(f"*** Picky werewolf: {self.name} has picked {name} and they have been added to the wolves channel.")
         else:
-            self.role_channel.send("You've already picked a wolf")
+            self.role_channel.send("You've already picked enough wolves")
 
 
 class protector(player):
@@ -425,8 +429,8 @@ class protector(player):
                 target = self.game.player_names_objs[name]
                 self.prev_target = name
                 target.house_prot = True
-                await self.role_channel.send("You have protected {}'s house.".format(name))
-                await self.game.gm_channel.send("*** Protector: {} has protected {}'s house.".format(self.name, name))
+                await self.role_channel.send(f"You have protected {name}'s house.")
+                await self.game.gm_channel.send(f"*** Protector: {self.name} has protected {name}'s house.")
 
 
 class witch(player):
