@@ -1,6 +1,5 @@
 import discord
 import random
-#import main
 from Topics import topics
 
 
@@ -379,3 +378,4 @@ role_switch_dict = {    # works like a factory for making the player objects in 
 
 
 # ------------ Testing ------------
+print(topics['picky werewolf'])

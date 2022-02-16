@@ -1,49 +1,51 @@
-Big things: 
+Keep track of:
+- use display_name instead of nickname
+- gm channel msgs on role events
+- Every message needs a reply
+- send messages to roles telling them it’s their time to act
 
-Day voting 
 
-FINISHED Make one gamestate variable (setup/night/witch/day/voting/prenight)
+Soon:
+- check for hunter in handle_end_night()
+- lover suicide method
+- in lover suicide: add to self.dead_this_night
 
-dead people gc
+Lynching
+- print statement and channel message in $lynch to make clear
+  how many players have voted
 
-Smaller things:
+- lover suicide method
 
-Town square channel required 
- - Make town square if not exists
+- Win condition function; called on every death
 
-Custom death texts for each role
+- check duplicate names in $join
+- check duplicate roles in $gamestart except for werewolf and civ
 
-Wolf voting:
-- who votes for who --> prevent double votes
-- when the gamemaster cuts off the voting 
 
-space in nickname should be prevented
-unique nicknames should be required
+At some point:
 
-check if lovers are the same players? 
+- dead people gc
+- on_member_update() to keep track of nickname changes; space in nickname should be prevented, unique nicknames should be required
+- on_user_update() to keep track of username changes
+- if player is mutilated, on status update check if they unmuted themselves, then remute them
+- in $leave : if in the middle of a game: “are you sure? This will kill you. If so, use $quit”
+- $remove to remove a player by the gm; same effect as $quit
+- GM can't use $join
+- Custom death texts for each role
 
-check if more than 1 of each role (certain roles?)
 
-stop witch from killing during day round (fixed?)
-add witch actions in newmute (fixed?)
-
-PICKING doesnt work --> permissions, add to GC
-- ww vote and then pick?
 
  
-
-
-
-Here some info about what happens in all edgecases:
-
+Edgecases:
 
 - Witch cannot heal a mutilation
 
-Edgecases TOCHECK: 
-
+TOCHECK
 - GM end night before any ww votes
 - Pick after the vote is decided
   - the picked tries to vote then? 
 
 
-  
+Possibilities:
+- Automatic checks on whether all roles have performed their actions for a certain gs?
+- timer on voting
