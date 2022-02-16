@@ -41,8 +41,8 @@ class ww_game():
             else:
                 self.lobby.append(name)
                 self.ids[name] = msg.author.id
-                print(f"{name} has joined the game, playercount now at {self.lobby}")
-                await self.town_square.send(f"{name} has joined the game, playercount now at {self.lobby}")
+                print(f"{name} has joined the game, playercount now at {len(self.lobby)}")
+                await self.town_square.send(f"{name} has joined the game, playercount now at {len(self.lobby)}")
 
     
     async def leave(self, msg: discord.Message):
@@ -54,8 +54,8 @@ class ww_game():
             if name in self.lobby:
                 self.lobby.remove(name)
                 del self.ids[name]
-                print(f"{name} has left the game, playercount now at {self.lobby}")
-                await self.town_square.send(f"{name} has left the game, playercount now at {self.lobby}")
+                print(f"{name} has left the game, playercount now at {len(self.lobby)}")
+                await self.town_square.send(f"{name} has left the game, playercount now at {len(self.lobby)}")
             else:
                 await msg.channel.send("No need, you weren't even in the game yet!")
 
@@ -251,8 +251,9 @@ class ww_game():
         """Deletes all channels used by the game except for the town_square. Called on $gamereset."""
         print("Removing channels...")
         for name in self.lobby:
-            player = self.player_names_objs[name]
-            await player.role_channel.delete()
+            if name in self.player_names_objs.keys():
+                player = self.player_names_objs[name]
+                await player.role_channel.delete()
         if self.wolf_channel:
             await self.wolf_channel.delete()
         if self.lovers_channel:

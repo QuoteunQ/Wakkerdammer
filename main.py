@@ -44,7 +44,7 @@ async def on_message(message: discord.Message):
         return
 
     if message.content.startswith('$help'):
-        await message.channel.send("Commands: $inspire $gamesetup $join $leave $gamestart $playerlist $clearplayerlist $allroles $roles $setup? $gm $beginnight $action $endnight $beginvoting")
+        await message.channel.send(f"Current commands: {known_commands}")
         return
     
     if message.content.startswith('$allroles'):
