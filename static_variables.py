@@ -7,6 +7,9 @@ client = discord.Client(intents=intents)
 min_players = 1
 possible_roles = {'werewolf', 'picky werewolf', 'cupid', 'kidnapper', 'protector', 'seer', 'witch', 'hunter', 'elder', 'fool', 'civilian'}
 gskey =  {0:'setup', 1: 'end of day', 2:'night: pre-wolves', 3:'night: wolves', 4:'night: witch', 5:'day: hunter', 6:'day: discussion', 7:'day: voting'}
+known_commands = {'$hello', '$inspire', '$help', '$allroles', '$gamesetup', '$join', '$leave', '$kidnap', '$protect', '$lovers', '$sleepat', '$pick', '$lunch',
+                '$playerlist', '$poopbreak', '$roles', '$gamestate', '$gm', '$alive', '$clearplayerlist', '$gamestart', '$gamereset', '$beginnight',
+                '$startwolfvoting', '$endwolfvoting', '$endnight'}
 
 # Set specific settings for the games:
 # - If kill_first is False, wolves mutilate on night 1

@@ -4,7 +4,7 @@ import requests
 import json
 from textwrap import dedent
 from classes import ww_game
-from static_variables import client, min_players, possible_roles, gskey
+from static_variables import client, min_players, possible_roles, gskey, known_commands
 
 
 games: 'dict[int, ww_game]' = {}                  # dict with < guild_id : game object >
@@ -27,7 +27,10 @@ async def on_ready():
 @client.event
 async def on_message(message: discord.Message):
     if message.author == client.user:
-        return 
+        return
+
+    if message.content.split(' ')[0] not in known_commands:
+        return
 
 # ----------------------- Commands which don't require a game taking place in the guild --------------------------
 
