@@ -103,33 +103,33 @@ async def on_message(message: discord.Message):
 # ---------------------------- Night Commands Players -----------------------------------
 
     if message.content.startswith('$kidnap'):
-        if await game.valid_target(message, req_role='kidnapper', req_gs=1):
+        if await game.valid_target(message, req_role='kidnapper', req_gs=2):
             await game.player_names_objs[message.author.display_name].kidnap(message)
         return
     
     if message.content.startswith('$protect'):
-        if await game.valid_target(message, req_role='protector', req_gs=1):
+        if await game.valid_target(message, req_role='protector', req_gs=2):
             await game.player_names_objs[message.author.display_name].protect(message)
         return
 
     if message.content.startswith('$lovers'):
-        if await game.valid_target(message, req_role='cupid', req_gs=1, req_target_count=2):
+        if await game.valid_target(message, req_role='cupid', req_gs=2, req_target_count=2):
             await game.player_names_objs[message.author.display_name].make_lovers(message)
         return
 
     if message.content.startswith('$sleepat'):
-        if await game.valid_target(message, req_role='cupid', req_gs=1):
+        if await game.valid_target(message, req_role='cupid', req_gs=2):
             await game.player_names_objs[message.author.display_name].sleep_at(message)
         return
 
-    if message.content.startswith('$lunch'):
-        if await game.valid_target(message, req_role='wolf', req_gs=2):
-            await game.player_names_objs[message.author.display_name].vote_lunch(message)
+    if message.content.startswith('$pick'):
+        if await game.valid_target(message, req_role='picky werewolf', req_gs=2):
+            await game.player_names_objs[message.author.display_name].pick_wolf(message)
         return
 
-    if message.content.startswith('$pick'):
-        if await game.valid_target(message, req_role='picky werewolf', req_gs=1):
-            await game.player_names_objs[message.author.display_name].pick_wolf(message)
+    if message.content.startswith('$lunch'):
+        if await game.valid_target(message, req_role='wolf', req_gs=3):
+            await game.player_names_objs[message.author.display_name].vote_lunch(message)
         return
 
 
@@ -167,7 +167,7 @@ async def on_message(message: discord.Message):
         return
 
     if message.content.startswith('$clearplayerlist'):
-        if game.gamestate == 0 and not len(game.alive):
+        if game.gamestate == 0:
             game.lobby = []
             game.ids = {}
             await message.channel.send("Player list is now empty")
@@ -187,8 +187,26 @@ async def on_message(message: discord.Message):
         await town_square_channel.send("Game reset!")
         return
 
+    if message.content.startswith('$beginnight'):
+        await game.begin_night()
+        return
+    
+    if message.content.startswith('$startwolfvoting'):
+        if game.gamestate != 2:
+            await game.gm_channel.send("The game isn't ready to start the wolf voting yet.")
+        else:
+            game.gamestate += 1
+            await game.wolf_channel.send("It's your turn to vote for tonight's kill now!")
+            await game.town_square.send("It's now the wolves' turn to select a target...")
+        return
+
     if message.content.startswith('$endwolfvoting'):
-        await game.wolf_kill()
+        await game.wolf_channel.send("The gamemaster has decided to end your voting, calculating the target now...")
+        await game.end_wolf_vote()
+        return
+    
+    if message.content.startswith('$endnight'):
+        await game.handle_end_night()
         return
 
 

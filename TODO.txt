@@ -2,20 +2,19 @@ Keep track of:
 - use display_name instead of nickname
 - gm channel msgs on role events
 - Every message needs a reply
+- send messages to roles telling them it’s their time to act
 
 
 Soon:
+- check for hunter in handle_end_night()
+- lover suicide method
+- in lover suicide: add to self.dead_this_night
 
 Lynching
 - print statement and channel message in $lynch to make clear
   how many players have voted
 
-Wolf voting
 - lover suicide method
-
-- Separate witch and hunter gamestates
-- send nightcount on night start to gm channel
-- send messages to roles telling them it’s their time to act
 
 - Win condition function; called on every death
 

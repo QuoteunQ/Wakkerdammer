@@ -378,4 +378,4 @@ role_switch_dict = {    # works like a factory for making the player objects in 
 
 
 # ------------ Testing ------------
-print(topics['picky_werewolf'])
+print(topics['picky werewolf'])

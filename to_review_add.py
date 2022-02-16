@@ -180,21 +180,6 @@ async def lynchresult(guild):
 
 # ----------- Night Commands GM ---------------------
 
-  if message.content.startswith('$beginnight'):
-    if message.author.nick != GM:
-      await message.channel.send("Relax bro you're not the GM")
-      return
-    if gamestate != 0 or gamestate != 4 or len(players) == 0: # if the game is not in setup or is not in voting mode
-      await message.channel.send("The game is not ready to begin the night yet")
-      return
-    gamestate = 1 # set gamestate to night
-    nightcount += 1
-    for i in wolves:  # Remove dead wolves from wolf list
-      if not i in alive:
-        wolves.remove(i)
-    await message.channel.send("Beginning night {}...\nPlease carry out your roles by interacting in your private channel(s) and good luck! :^)".format(nightcount))  
-    print("Night started!! \n------ To end the night, you can type $endnight ------")   
-
   if message.content.startswith('$endnight'):
     if message.author.nick != GM:
       await message.channel.send("Relax bro you're not the GM")

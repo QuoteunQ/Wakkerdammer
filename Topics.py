@@ -1,4 +1,4 @@
-topics_temp = {
+topics = {
 'kidnapper':
     "- You are the kidnapper! During nights type $kidnap <player name> to kidnap someone, and vote for someone during days using $lynch <player name>. "
     "For questions please @ the gamemaster. Type $help to see other commands",
@@ -29,5 +29,3 @@ topics_temp = {
 'lovers':
     "- Welcome! You've been made lovers by our dear cupid. Feel free to get acquainted in this channel."
 }
-print(topics_temp.items())
-topics = {i:j for (i,j) in topics_temp.items()}
