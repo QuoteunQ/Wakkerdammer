@@ -32,7 +32,7 @@ At some point:
 - GM can't use $join
 - Custom death texts for each role
 
-Questions
+Questions:
 - does the kidnapper kidnap just the target or everyone at the house (slut)
 
  

@@ -3,11 +3,11 @@ import discord
 import requests
 import json
 from textwrap import dedent
-from classes import ww_game
+from classes import WwGame
 from static_variables import client, min_players, possible_roles, gskey, known_commands
 
 
-games: 'dict[int, ww_game]' = {}                  # dict with < guild_id : game object >
+games: 'dict[int, WwGame]' = {}                  # dict with < guild_id : game object >
 
 
 
@@ -60,7 +60,7 @@ async def on_message(message: discord.Message):
             if not town_square_channel:
                 town_square_channel = await message.guild.create_text_channel(name='town_square')
                 await town_square_channel.send("I've created this channel for all non-secret communication about the game.")
-            new_game = ww_game(message.guild, message.author)
+            new_game = WwGame(message.guild, message.author)
             overwritesgm = {
                 message.guild.default_role: discord.PermissionOverwrite(read_messages=False),
                 message.author: discord.PermissionOverwrite(read_messages=True),
