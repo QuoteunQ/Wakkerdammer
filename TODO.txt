@@ -3,18 +3,16 @@ Keep track of:
 - gm channel msgs on role events
 - Every message needs a reply
 - send messages to roles telling them it’s their time to act
+- add all commands to known_commands
+- add new roles to role_switch_dict
 
 
 Soon:
-- check for hunter in handle_end_night()
-- lover suicide method
-- in lover suicide: add to self.dead_this_night
+- in lover suicide: add to self.dead_this_night?
 
 Lynching
 - print statement and channel message in $lynch to make clear
   how many players have voted
-
-- lover suicide method
 
 - Win condition function; called on every death
 
@@ -33,7 +31,8 @@ At some point:
 - GM can't use $join
 - Custom death texts for each role
 
-
+Questions
+- does the kidnapper kidnap just the target or everyone at the house (slut)
 
  
 Edgecases:
@@ -47,5 +46,6 @@ TOCHECK
 
 
 Possibilities:
+- mute players during night
 - Automatic checks on whether all roles have performed their actions for a certain gs?
 - timer on voting
