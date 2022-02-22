@@ -2,23 +2,6 @@ overwritesdead = {} # contains permissions for the death realm
 mutilated = [] # not in use??
 lynchvotes = {} # votes for lynching
 
-async def hunterkill(guild):
-  """" Called when the hunter is killed, kills the hunter target """
-  global hunt
-  global newdead
-  global gamestate
-  if hunt['target']:
-    channel = discord.utils.get(guild.channels, name='town_square')
-    if channel:
-      for i in players:
-          if i.name == hunt['target'] and hunt['target'] in alive:
-            kill(i.name, guild)
-            if gamestate != 4: # if not in voting
-              newdead.append(i.name)
-            print("{} was the hunter, {} was their target".format(hunt['player'], hunt['target']))
-            await channel.send("{} was the hunter, {} was their target".format(hunt['player'], hunt['target']))
-    else:
-      print("Hunterkill: NO TOWN_SQUARE CHANNEL")
   
 
 async def lynchresult(guild):
@@ -74,16 +57,6 @@ async def lynchresult(guild):
     print("Lynchresult: NO TOWN_SQUARE CHANNEL FOUND")
 
 
-
-  if message.content.startswith('$hunt'): #hunter need to be alive?
-    if message.channel.name == 'hunter' and message.author.nick in alive: 
-      target = message.content.split(' ')[1]
-      if not target in alive:
-        await message.channel.send("The player you submitted is not in the game or is not alive")
-        return
-      hunt['target'] == target
-      await message.channel.send("{} is now your hunter target".format(target))
-      print("Hunter: {} has chosen {} as their hunter target".format(message.author.nick, target))
 
   if message.content.startswith('$lookat'):
     if message.channel.name == 'seer'and gamestate == 1and message.author.nick in alive:
@@ -178,119 +151,6 @@ async def lynchresult(guild):
       else:
         await message.channel.send("Did not recognize name of potion")
 
-# ----------- Night Commands GM ---------------------
-
-  if message.content.startswith('$endnight'):
-    if message.author.nick != GM:
-      await message.channel.send("Relax bro you're not the GM")
-      return
-    if gamestate != 1:
-      await message.channel.send("The game is not ready to end the night yet")
-      return
-    print("+++ Ending night, calculating kidnapper/cupid/protector spaghetti")
-    await message.channel.send("The night is drawing to a close...\nMost night actions are now completed")
-    if len(lunchvotes) < len(wolves): #cut off the wolf votes if they are not finished
-      guild = message.guild
-      channel = discord.utils.get(guild.channels, name='werewolves')
-      await lunchresult(message.guild, channel) # find the lunch result if there is one
-    gamestate += 1 # set gamestate to witching hour
-
-    # Handle results by role, this is the spaghetti 
-    if 'kidnapper' in roles:
-      if wolftarget == kidnap['player']:
-        for i in players:
-          if i.name == kidnap['target']:
-            i.wolftarget = True
-            print("*** {} became a wolftarget because they were kidnapped by {}".format(i.name, kidnap['player']))
-
-    if 'cupid' in roles:
-      if stayat['target'] == kidnap['target']:
-        stayat['target'] = kidnap['player']
-        print("*** {} was staying at the kidnap target {} and so is at the kidnapper {} tonight".format(stayat['player'], kidnap['target'], kidnap['player']))
-      if stayat['target'] == wolftarget:
-        for i in players:
-          if i.name == stayat['player']:
-            i.wolftarget = True
-            print('*** {} has become a wolftarget for staying at {}"s, who is a wolftarget'.format(stayat['player'], wolftarget))   
-
-    if 'protector' in roles: # protector protects 
-      for i in players:
-        if i.wolftarget and protect['target'] == i.name:
-          i.wolftarget = False
-          print("*** {} was saved because they were protected".format(i.name))
-
-    if 'seer' in roles:
-      channel = discord.utils.get(message.guild.channels, name='seer')
-      seerresult = 'fail to find player / player role'
-      for i in players:
-        if i.name == lookat['target']:
-          seerresult = i.role
-      await channel.send("Seer action results: {} is the {}".format(lookat['target'], seerresult))
-      print('*** The seer has recieved the lookat results and now knows that {} is the {}'.format(lookat['target'], seerresult))
-
-    dead, mute = anydead(players) # calculate results 
-    for i in newmute:
-      if i not in mutilated:
-        mutilated.append(i)
-    print("Dead: {}. Mutilated: {} Giving witch and hunter the info (if applicable)".format(newdead, newmute))
-
-    if 'witch' in roles:
-      channel = discord.utils.get(message.guild.channels, name='witch')
-      await channel.send("{} has been killed tonight and {} has been mutilated. Please type which potions you would like to use tonight by typing $potion <type> <player nickname>. Potion types are 'death', 'life', and 'mute' You can type '$potions?' to see which potions you have left. If you decide to not use any potions, please let the gamemaster know".format(newdead, newmute))
- 
-    if 'hunter' in roles:
-      channel = discord.utils.get(message.guild.channels, name='hunter')
-      await channel.send("{} has been killed tonight and {} has been mutilated. Does this information change your hunt target? You can change your hunt target by typing $hunt <player nickname>".format(newdead, newmute))
-    print("------ Night successfully ended: ready for $nightresults -------\nWitch/Hunter etc. may need some time")
-
-  if message.content.startswith('$nightresults'):
-    if message.author.nick != GM:
-      await message.channel.send("Relax bro you're not the GM")
-      return
-    if gamestate == 1:
-      await message.channel.send("The game is not ready for the night results yet")
-      return
-    dead, mute = anydead(players) # check if any died/mutilated from the witch, if so it so <-- this necessary???? handle every
-    if 'hunter' in roles:
-      if hunt['player'] in dead and hunt['target']:
-        hunterkill(message.guild)
-    nrdead = len(newdead)
-    nrmute = len(newmute)
-    lunchvotes = []
-    if nrdead > 0 or nrmute > 0:
-      await message.channel.send("Tonight's has {} victims: {} has died, and {} has been mutilated".format(nrdead + nrmute, newdead, newmute))
-    else:
-      await message.channel.send("Everyone wakes up to a calm morning")
-    # handle lovers dying, does not work if multiple cupids: 
-    if 'cupid' in roles and couple != []:
-      for i in newdead:
-        if i in couple and len(couple) > 1:
-          remain = couple.remove(i)[0]
-          if remain in newdead:
-            print("*** Lovers have both died tonight")
-          else:
-            print("*** One lover is dead, the other dies as a consequence")
-            await message.channel.send("{} tragically chooses to end their life after they find out that {} has died".format(remain, i))
-            for j in players:
-              if j.name == remain:
-                j.alive = False
-                alive.remove(j.name)
-      couple = []
-
-
-    kidnap['prev'] = kidnap['target']
-    kidnap['target'] = None
-    protect['prev'] = protect['target']
-    protect['target'] = None
-    stayat['prev'] = stayat['target']
-    stayat['target'] = None
-    lookat['target'] = None
-    newmute = []
-    newdead = []
-    gamestate += 1 # set gamestate to DAY
-    for i in players:
-      i.reset_mods()
-    print("------- Night results sent. To begin voting, type: $beginvoting -------")
 
 # ------------- Voting Commands GM and Player -----------------
 

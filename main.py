@@ -125,6 +125,11 @@ async def on_message(message: discord.Message):
             await game.player_names_objs[message.author.display_name].sleep_at(message)
         return
 
+    if message.content.startswith('$hunt'):
+        if await game.valid_target(message, req_role='hunter', req_gs=5):
+            await game.player_names_objs[message.author.display_name].hunt(message)
+        return
+
     if message.content.startswith('$pick'):
         if await game.valid_target(message, req_role='picky werewolf', req_gs=2):
             await game.player_names_objs[message.author.display_name].pick_wolf(message)
@@ -195,12 +200,7 @@ async def on_message(message: discord.Message):
         return
     
     if message.content.startswith('$startwolfvoting'):
-        if game.gamestate != 2:
-            await game.gm_channel.send("The game isn't ready to start the wolf voting yet.")
-        else:
-            game.gamestate += 1
-            await game.wolf_channel.send("It's your turn to vote for tonight's kill now!")
-            await game.town_square.send("It's now the wolves' turn to select a target...")
+        await game.start_wolf_vote()
         return
 
     if message.content.startswith('$endwolfvoting'):
@@ -210,6 +210,10 @@ async def on_message(message: discord.Message):
     
     if message.content.startswith('$endnight'):
         await game.handle_end_night()
+        return
+
+    if message.content.startswith('$endhunter'):
+        game.end_hunter_hour()
         return
 
 
