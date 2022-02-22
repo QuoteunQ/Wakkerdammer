@@ -61,7 +61,7 @@ class ww_game():
                 await msg.channel.send("No need, you weren't even in the game yet!")
 
 
-    # --------------------------======---- Gamestate flow control functions --------------------------------------------------------
+    # ---------------------------------- Gamestate flow control functions --------------------------------------------------------
 
     async def start(self, msg: discord.Message):
         """Starts the game with the roles included in the $gamestart command message. This changes the gamestate from setup (0) to end of day (1),
@@ -128,7 +128,8 @@ class ww_game():
 
     async def end_wolf_vote(self):
         """Called when all wolves have voted or the gamemaster ends the night early. Calculates who the wolf target is and attempts to kill them.
-        Assumes valid_target has already been called for each individual wolf's vote. Also advances the gamestate to night: witch (4)."""
+        Assumes valid_target has already been called for each individual wolf's vote. Also advances the gamestate to night: witch (4) if there is a witch in the game,
+        otherwise ends the night by calling handle_end_night() automatically."""
         if self.gamestate != 3:
             self.gm_channel.send(f"The game is unable to calculate the wolf kill during this state of the game ({gskey[self.gamestate]}).")
         else:
@@ -220,7 +221,7 @@ class ww_game():
                     hunter.loaded = False
                     await hunter.role_channel.send("The gamemaster has decided to cut off your target selection, your gun will remain unused.")
 
-            if self.hunter_source_gs == 4:          # from end of night, go to day voting
+            if self.hunter_source_gs == 4:          # from end of night, go to day: discussion
                 self.hunter_source_gs = 0
                 self.start_day_discussion()
             elif self.hunter_source_gs == 7:        # from day voting, go to end of day
@@ -298,7 +299,7 @@ class ww_game():
 
 
     async def valid_target(self, msg: discord.Message, req_role: str, req_gs: int, req_target_count: int =1) -> bool:
-        """Performs all checks to make sure a command message containing a (player) target is valid. This includes:
+        """Performs all general checks to make sure a command message containing a (player) target is valid. This includes:
            - Is the message author alive (not applicable if hunter)
            - Was the right channel used for the command and does the author have the required role for the command. The <req_role> input is a role string which determines this.
              'wolf' and 'civilian' are used to denote messages that should originate from the wolf channel and town_square, respectively.
@@ -371,7 +372,7 @@ class player():
 
         # statuses which reset every night
         self.house_prot = False
-        self.at_home = [name]        # list of players who are at this player's house
+        self.at_home = [name]                           # list of players who are at this player's house
         self.role_performed = False
 
 
@@ -618,43 +619,55 @@ class witch(player):
     def __init__(self, game: ww_game, name: str):
         super().__init__(game, name)
         self.role = 'witch'
-        self.potions = {'death': 1, 'life': 1, 'mute': 1}
-    
-    def witch_heal(self, recently_deceased, name):
-        """Given a dead player's name, revive that player using a life potion if they are in the list of people who died this night."""
-        if name in recently_deceased:
-            if self.potions['life']:
-                target = self.game.player_names_objs[name]
-                target.is_alive = True
-                self.potions['life'] -= 1
-            else:
-                # return message saying there's no more healing potions
-                pass
-        else:
-            # return message saying name was invalid
-            pass
-    
-    def witch_kill(self, name):
-        """Given a player name, kill that player by using a death potion."""
-        # function to check whether submitted name is valid, only then proceed
-        if self.potions['death']:
-            target = self.game.player_names_objs[name]
-            target.is_alive = False
-            self.potions['death'] -= 1
-        else:
-            # return message saying there's no more killing potions
-            pass
+        self.potions = {'kill': 1, 'heal': 1, 'mute': 1}
 
-    def witch_mutilate(self, name):
-        """Given a player name, mutilate that player by using a mutilation potion."""
-        # function to check whether submitted name is valid, only then proceed
-        if self.potions['mute']:
-            target = self.game.player_names_objs[name]
-            #target.mutilate()
-            self.potions['mute'] -= 1
+    async def use_potion(self, msg: discord.Message):
+        """Given a message containing 'potion_name target_name', uses the potion on the target."""
+        potion, name = msg.content.split(' ')
+
+        if potion == 'heal':
+            if self.potions['heal']:
+                if name in self.game.dead_this_night:
+                    self.game.dead_this_night.remove(name)
+                    self.potions['heal'] -= 1
+                    await self.role_channel.send(f"You have healed {name} of their wounds so they may live.")
+                    await self.game.gm_channel.send(f"*** Witch: {self.name} has saved {name} from death.")
+                elif name in self.game.mute_this_night:
+                    self.game.mute_this_night.remove(name)
+                    self.potions['heal'] -= 1
+                    await self.role_channel.send(f"You have saved {name}'s tongue.")
+                    await self.game.gm_channel.send(f"*** Witch: {self.name} has prevented {name}'s mutilation.")
+                else:
+                    await self.role_channel.send("That person doesn't need any healing tonight (anymore). You can try again if you wish.")
+            else:
+                await self.role_channel.send("You don't have any healing potions left!")
+
+        elif potion == 'kill':
+            if self.potions['kill']:
+                if name not in self.game.dead_this_night:
+                    self.game.dead_this_night.add(name)
+                    self.potions['kill'] -= 1
+                    await self.role_channel.send(f"You have poisoned {name}, they won't wake up in the morning.")
+                    await self.game.gm_channel.send(f"*** Witch: {self.name} has killed {name}.")
+                else:
+                    await self.role_channel.send("That person has already died tonight, so no use poisoning them too! You can try to use your killing potion again if you wish.")
+            else:
+                await self.role_channel.send("You don't have any killing potions left!")
+
+        elif potion == 'mute':
+            if self.potions['mute']:
+                if name not in self.game.mute_this_night:
+                    self.game.mute_this_night.add(name)
+                    self.potions['mute'] -= 1
+                    await self.role_channel.send(f"The acidic brew eats away {name}'s tongue, they will never speak again.")
+                    await self.game.gm_channel.send(f"*** Witch: {self.name} has mutilated {name}.")
+                else:
+                    await self.role_channel.send("That person has already been mutilated tonight, so no use doing it twice! You can try to use your mutilating potion again if you wish.")
+            else:
+                await self.role_channel.send("You don't have any mutilating potions left!")
+
         else:
-            # return message saying there's no more mutilation potions
-            pass
+            await self.role_channel.send(f"Did not recognise the following potion: {potion}")
 
 
 role_switch_dict = {    # works like a factory for making the player objects in ww_game.distribute_roles()

@@ -140,6 +140,12 @@ async def on_message(message: discord.Message):
             await game.player_names_objs[message.author.display_name].vote_lunch(message)
         return
 
+    if message.content.startswith('$potion '):
+        message.content = message.content[8:]       # split off the '$potion ' part to make valid_target and use_potion handle the message as 'heal/kill/mute target_name'
+        if await game.valid_target(message, req_role='witch', req_gs=4):
+            await game.player_names_objs[message.author.display_name].use_potion(message)
+        return
+
 
 # ------------------------------ Utility commands -------------------------------------
 
