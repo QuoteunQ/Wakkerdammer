@@ -5,7 +5,7 @@ intents.members = True
 client = discord.Client(intents=intents)
 
 min_players = 1
-possible_roles = {'werewolf', 'picky werewolf', 'cupid', 'kidnapper', 'protector', 'seer', 'witch', 'hunter', 'elder', 'fool', 'civilian'}
+possible_roles = {'werewolf', 'picky_werewolf', 'cupid', 'kidnapper', 'protector', 'seer', 'witch', 'hunter', 'elder', 'fool', 'civilian'}
 gskey =  {0:'setup', 1: 'end of day', 2:'night: pre-wolves', 3:'night: wolves', 4:'night: witch', 5:'day: hunter', 6:'day: discussion', 7:'day: voting'}
 known_commands = {
     '$hello', '$inspire', '$help', '$allroles',                                                     # commands not influencing a game
@@ -13,7 +13,7 @@ known_commands = {
     '$kidnap', '$protect', '$hunt', '$lovers', '$sleepat', '$pick', '$lunch', '$potion',            # night commands players
     '$playerlist', '$poopbreak', '$roles', '$gamestate', '$gm', '$alive',                           # utility commands
     '$clearplayerlist', '$gamestart', '$gamereset',                                                 # game control gamemaster
-    '$beginnight', '$startwolfvoting', '$endwolfvoting', '$endnight', '$endhunter'                  # gamestate flow control gamemaster
+    '$beginnight', '$startwolves', '$endwolves', '$endnight', '$endhunter'                  # gamestate flow control gamemaster
 }
 
 # Set specific settings for the games:

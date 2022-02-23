@@ -131,7 +131,7 @@ async def on_message(message: discord.Message):
         return
 
     if message.content.startswith('$pick'):
-        if await game.valid_target(message, req_role='picky werewolf', req_gs=2):
+        if await game.valid_target(message, req_role='picky_werewolf', req_gs=2):
             await game.player_names_objs[message.author.display_name].pick_wolf(message)
         return
 
@@ -205,11 +205,11 @@ async def on_message(message: discord.Message):
         await game.begin_night()
         return
     
-    if message.content.startswith('$startwolfvoting'):
+    if message.content.startswith('$startwolves'):
         await game.start_wolf_vote()
         return
 
-    if message.content.startswith('$endwolfvoting'):
+    if message.content.startswith('$endwolves'):
         await game.wolf_channel.send("The gamemaster has decided to end your voting, calculating the target now...")
         await game.end_wolf_vote()
         return

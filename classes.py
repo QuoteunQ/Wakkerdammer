@@ -109,25 +109,27 @@ class WwGame():
                 "Please carry out your roles by interacting in your private channel(s) and good luck! :^)")
             await self.gm_channel.send(
                 "Please check if all roles which should act before the wolves have performed their respective actions.\n"
-                f"To move the game to night: wolves, use $startwolfvoting")
+                f"To move the game to night: wolves, use $startwolves")
 
             for role in {'kidnapper', 'cupid', 'protector', 'seer'}:
-                for player in self.player_roles_objs[role]:
-                    await player.role_channel.send("It's now your turn to perform your action!")
+                if role in self.roles:
+                    for player in self.player_roles_objs[role]:
+                        await player.role_channel.send("It's now your turn to perform your action!")
 
 
     async def start_wolf_vote(self):
-        """Advances the game to the night: wolves gamestate (3). Called when the gamemaster uses $startwolfvoting."""
+        """Advances the game to the night: wolves gamestate (3). Called when the gamemaster uses $startwolves."""
         if self.gamestate != 2:
             await self.gm_channel.send("The game isn't ready to start the wolf voting yet.")
         else:
             self.gamestate += 1
+            await self.gm_channel.send("Moving on to the wolves...")
             await self.wolf_channel.send("It's your turn to vote for tonight's kill now!")
             await self.town_square.send("It's now the wolves' turn to select a target...")
 
 
     async def end_wolf_vote(self):
-        """Called when all wolves have voted or the gamemaster ends the night early. Calculates who the wolf target is and attempts to kill them.
+        """Called when all wolves have voted or the gamemaster uses $endwolves. Calculates who the wolf target is and attempts to kill them.
         Assumes valid_target has already been called for each individual wolf's vote. Also advances the gamestate to night: witch (4) if there is a witch in the game,
         otherwise ends the night by calling handle_end_night() automatically."""
         if self.gamestate != 3:
@@ -275,7 +277,7 @@ class WwGame():
             }
             new_player.role_channel = await self.guild.create_text_channel(name=role, overwrites=overwrites, topic=topics[role])
 
-            if role in {'werewolf', 'picky werewolf'}:
+            if role in {'werewolf', 'picky_werewolf'}:
                 overwrites_ww[self.guild.get_member(self.ids[participant])] = discord.PermissionOverwrite(read_messages=True)
 
         self.wolf_channel = await self.guild.create_text_channel(name='werewolves', overwrites=overwrites_ww, topic=topics['werewolves'])
@@ -285,10 +287,8 @@ class WwGame():
     async def delete_channels(self):
         """Deletes all channels used by the game except for the town_square. Called on $gamereset."""
         print("Removing channels...")
-        for name in self.lobby:
-            if name in self.player_names_objs.keys():
-                player = self.player_names_objs[name]
-                await player.role_channel.delete()
+        for player in self.player_names_objs.values():
+            await player.role_channel.delete()
         if self.wolf_channel:
             await self.wolf_channel.delete()
         if self.lovers_channel:
@@ -396,7 +396,7 @@ class Player():
         else:
             target = msg.content.split(' ')[1]
             self.kill_vote = target
-            vote_count = len([wolf.kill_vote for wolf in self.game.wolves if wolf.kill_vote != ''])
+            vote_count = len([self.game.player_names_objs[wolf].kill_vote for wolf in self.game.wolves if wolf.kill_vote != ''])
             wolves_vote_msg = f"*** Wolves: {self.name} has voted to lunch {target}. {vote_count}/{len(self.game.wolves)} wolves have voted."
             await self.game.wolf_channel.send(wolves_vote_msg)
             await self.game.gm_channel.send(wolves_vote_msg)
@@ -412,7 +412,7 @@ class Player():
         if self.wolf:
             self.game.wolves.remove(self.name)
 
-        if self.role not in {'werewolf, picky werewolf'} and self.wolf:
+        if self.role not in {'werewolf, picky_werewolf'} and self.wolf:
             await self.game.town_square.send(f"{self.name} died, they were the {self.role}, and they were the picked werewolf.")
         else:
             await self.game.town_square.send(f"{self.name} died, they were the {self.role}.")
@@ -582,7 +582,7 @@ class Werewolf(Player):
 class PickyWerewolf(Werewolf):
     def __init__(self, game: WwGame, name: str):
         super().__init__(game, name)
-        self.role = 'picky werewolf'
+        self.role = 'picky_werewolf'
         self.charges = 1
 
     async def pick_wolf(self, msg: discord.Message):
@@ -684,7 +684,7 @@ role_switch_dict = {    # works like a factory for making the player objects in 
     'kidnapper':        lambda game, name: Kidnapper(game, name),
     'cupid':            lambda game, name: Cupid(game, name),
     'werewolf':         lambda game, name: Werewolf(game, name),
-    'picky werewolf':   lambda game, name: PickyWerewolf(game, name),
+    'picky_werewolf':   lambda game, name: PickyWerewolf(game, name),
     'protector':        lambda game, name: Protector(game, name),
     'witch':            lambda game, name: Witch(game, name),
     'elder':            lambda game, name: Elder(game, name),
