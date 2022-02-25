@@ -1,7 +1,6 @@
 import discord
 import random
-from static_variables import client, min_players, possible_roles, settings, gskey
-from Topics import topics
+from static_variables import client, min_players, possible_roles, settings, gskey, topics
 
 
 class WwGame():
