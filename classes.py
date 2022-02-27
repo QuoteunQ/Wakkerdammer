@@ -395,7 +395,7 @@ class Player():
         else:
             target = msg.content.split(' ')[1]
             self.kill_vote = target
-            vote_count = len([self.game.player_names_objs[wolf].kill_vote for wolf in self.game.wolves if wolf.kill_vote != ''])
+            vote_count = len([self.game.player_names_objs[wolf].kill_vote for wolf in self.game.wolves if self.game.player_names_objs[wolf].kill_vote != ''])
             wolves_vote_msg = f"*** Wolves: {self.name} has voted to lunch {target}. {vote_count}/{len(self.game.wolves)} wolves have voted."
             await self.game.wolf_channel.send(wolves_vote_msg)
             await self.game.gm_channel.send(wolves_vote_msg)
