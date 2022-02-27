@@ -468,7 +468,7 @@ class Hunter(Player):
         self.loaded = True
 
     async def hunt(self, msg: discord.Message):
-        """Given a $hunt command message, kill the player given by the name in the message."""
+        """Given a $shoot command message, kill the player given by the name in the message."""
         if not self.is_alive:
             if self.loaded:
                 name = msg.content.split(' ')[1]

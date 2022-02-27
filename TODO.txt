@@ -9,7 +9,6 @@ Keep track of:
 
 Soon:
 
-
 Lynching
 - print statement and channel message in $lynch to make clear
   how many players have voted
@@ -17,6 +16,10 @@ Lynching
 - Win condition function; called on every death
 
 - write role instructions to topics
+
+- Mutilation
+
+- In werewolf channel topic add setting of mutilate on night 1
 
 
 At some point:

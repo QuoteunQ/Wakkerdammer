@@ -125,7 +125,7 @@ async def on_message(message: discord.Message):
             await game.player_names_objs[message.author.display_name].sleep_at(message)
         return
 
-    if message.content.startswith('$hunt'):
+    if message.content.startswith('$shoot'):
         if await game.valid_target(message, req_role='hunter', req_gs=5):
             await game.player_names_objs[message.author.display_name].hunt(message)
         return

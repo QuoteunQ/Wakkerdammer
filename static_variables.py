@@ -6,49 +6,85 @@ client = discord.Client(intents=intents)
 
 min_players = 1
 possible_roles = {'werewolf', 'picky_werewolf', 'cupid', 'kidnapper', 'protector', 'seer', 'witch', 'hunter', 'elder', 'fool', 'civilian'}
-gskey =  {0:'setup', 1: 'end of day', 2:'night: pre-wolves', 3:'night: wolves', 4:'night: witch', 5:'day: hunter', 6:'day: discussion', 7:'day: voting'}
+gskey =  {
+    0:'setup',
+    1: 'end of day',
+    2:'night: pre-wolves',
+    3:'night: wolves',
+    4:'night: witch',
+    5:'day: hunter',
+    6:'day: discussion',
+    7:'day: voting'
+}
 known_commands = {
     '$hello', '$inspire', '$help', '$allroles',                                                     # commands not influencing a game
     '$gamesetup', '$join', '$leave',                                                                # game setup
-    '$kidnap', '$protect', '$hunt', '$lovers', '$sleepat', '$pick', '$lunch', '$potion',            # night commands players
+    '$kidnap', '$protect', '$shoot', '$lovers', '$sleepat', '$pick', '$lunch', '$potion',            # night commands players
     '$playerlist', '$poopbreak', '$roles', '$gamestate', '$gm', '$alive',                           # utility commands
     '$clearplayerlist', '$gamestart', '$gamereset',                                                 # game control gamemaster
-    '$beginnight', '$startwolves', '$endwolves', '$endnight', '$endhunter'                  # gamestate flow control gamemaster
+    '$beginnight', '$startwolves', '$endwolves', '$endnight', '$endhunter'                          # gamestate flow control gamemaster
 }
 
 # Set specific settings for the games:
 # - If kill_first is False, wolves mutilate on night 1
 # - If lovers_on_night_1 is True, the lovers can only be made on night 1
-settings = {'kill_first': False, 'lovers_on_night_1': True}
+settings = {'kill_first': True, 'lovers_on_night_1': True}
 
 topics = {
-'kidnapper':
-    "- You are the kidnapper! During nights type $kidnap <player name> to kidnap someone, and vote for someone during days using $lynch <player name>. "
-    "For questions please @ the gamemaster. Type $help to see other commands",
-'cupid':
-    "",
-'protector':
-    "",
-'seer':
-    "",
-'witch':
-    "",
-'hunter':
-    "", 
-'elder':
-    "",
-'fool':
-    "",
-'civilian':
-    "",
-'werewolf':
-    "",
-'picky_werewolf':
-    "- You are the picky werewolf! The other werewolves are {} (if there is an incorrect number in here contact the gamemaster). "
-    "You are able to pick {} other werewolf(s). Pick someone by typing $pick <player name>. "
-    "You vote to kill/mutilate in the werewolves groupchat. For questions please @ the gamemaster. Type $help to see other commands.",
-'werewolves':
-    "- Welcome to the werewolves groupchat! This groupchat will be used for discussing the game amongst yourselves.",
-'lovers':
-    "- Welcome! You've been made lovers by our dear cupid. Feel free to get acquainted in this channel."
+    'kidnapper':
+        "- You are the kidnapper! During nights type $kidnap <player name> to kidnap someone. "
+        "You can't select the same target two nights in a row. "
+        "You can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.",
+    'cupid':
+        "- You are cupid! During nights type $sleepat <player name> to stay over at someone's house. "
+        f"Make the lover couple using $lovers <player name 1> <player name 2>. The setting that you can only make lovers on night 1 is set to: {settings['lovers_on_night_1']}. "
+        "You can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.",
+    'protector':
+        "- You are the protector! During nights type $protect <player name> to protect someone's house (including your own). "
+        "You can't select the same target two nights in a row. "
+        "You can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.",
+    'seer':
+        "- You are the seer! During nights type $lookat <player name> to obtain that person's role. "
+        "You can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.",
+    'witch':
+        "- You are the witch! You will be told at the end of each night who that night's victims are. "
+        "You can then use your potions by typing $potion <kill/heal/mute> <player name> to use the specified potion on the specified player. "
+        "You can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.",
+    'hunter':
+        "- You are the hunter! When you are killed, you can use $shoot <player name> to take someone with you to the grave. "
+        "You can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.", 
+    'elder':
+        "- You are the elder! You will survive the wolves' first attack if they target you. "
+        "You can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.",
+    'fool':
+        "- You are the fool! You will survive the first time the town attempst to lynch you by voting. "
+        "You can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.",
+    'civilian':
+        "- You are a civilian! Sit tight during the night, but when day comes, "
+        "you can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.",
+    'werewolf':
+        "- You are a werewolf! You have been added to another channel together with the other werewolves. "
+        "During nights type $lunch <player name> in that channel to cast your vote for that player regarding that night's kill. "
+        "You can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.",
+    'picky_werewolf':
+        "- You are the picky werewolf! You have been added to another channel together with the other werewolves. "
+        "During nights type $lunch <player name> in that channel to cast your vote for that player regarding that night's kill. "
+        "You can pick another wolf from among the remaining players to add to the pack by typing $pick <player name>. "
+        "You can vote for someone during days using $lynch <player name>. "
+        "For questions please @ the gamemaster. Type $help to see other commands.",
+    'werewolves':
+        "- Welcome to the werewolves groupchat! This channel will be used for discussing the game amongst yourselves, "
+        "as well as casting your individual votes for each night's kill.",
+    'lovers':
+        "- Welcome! You've been made lovers by our dear cupid. Feel free to get acquainted in this channel."
 }
