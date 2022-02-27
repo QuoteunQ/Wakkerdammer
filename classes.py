@@ -115,10 +115,10 @@ class WwGame():
                 "Please check if all roles which should act before the wolves have performed their respective actions.\n"
                 f"To move the game to night: wolves, use $startwolves")
 
-            for role in {'kidnapper', 'cupid', 'protector', 'seer'}:
+            for role in {'kidnapper', 'cupid', 'protector', 'seer', 'picky werewolf'}:
                 if role in self.roles:
                     for player in self.player_roles_objs[role]:
-                        await player.role_channel.send("It's now your turn to perform your action!")
+                        await player.role_channel.send("It's now your turn to perform your personal role-specific action(s)!")
 
 
     async def start_wolf_vote(self):
@@ -147,27 +147,31 @@ class WwGame():
                     wolf_votes[wolf.kill_vote] += 1
                     wolf.kill_vote = ''
 
-            # stalemate:
-            if list(wolf_votes.values()).count(max(wolf_votes.values())) > 1:
-                await self.gm_channel.send("*** Wolves: Stalemate in lunch voting, no wolf target")
-                await self.wolf_channel.send("Stalemate in voting, no lunch tonight rippp")
-            
+            if max(wolf_votes.values()) == 0:
+                await self.gm_channel.send("*** Wolves: no votes were cast, no wolf target")
+                await self.wolf_channel.send("No votes were cast, which means no one dies by your hand tonight.")
             else:
-                target = self.player_names_objs[max(wolf_votes, key=wolf_votes.get)]
-                await self.gm_channel.send(f"*** Wolves: {target.name} is the lunch target")
-                await self.wolf_channel.send(f"{target.name} is the lunch target")
-
-                if target.house_prot:
-                    await self.gm_channel.send(f"*** Wolves: {target.name}'s house is protected")
+                # stalemate:
+                if list(wolf_votes.values()).count(max(wolf_votes.values())) > 1:
+                    await self.gm_channel.send("*** Wolves: Stalemate in lunch voting, no wolf target")
+                    await self.wolf_channel.send("Stalemate in voting, no lunch tonight rippp")
+                
                 else:
-                    for name in target.at_home:
-                        player = self.player_names_objs[name]
-                        if player.role == 'elder' and player.elder_prot:
-                            player.elder_prot = False
-                            await self.gm_channel.send(f"*** Wolves: {player.name} survived the attack because they are the elder")
-                        else:
-                            self.dead_this_night.add(player.name)
-                            await self.gm_channel.send(f"*** Wolves: {player.name} was killed by the wolves")
+                    target = self.player_names_objs[max(wolf_votes, key=wolf_votes.get)]
+                    await self.gm_channel.send(f"*** Wolves: {target.name} is the lunch target")
+                    await self.wolf_channel.send(f"{target.name} is the lunch target")
+
+                    if target.house_prot:
+                        await self.gm_channel.send(f"*** Wolves: {target.name}'s house is protected")
+                    else:
+                        for name in target.at_home:
+                            player = self.player_names_objs[name]
+                            if player.role == 'elder' and player.elder_prot:
+                                player.elder_prot = False
+                                await self.gm_channel.send(f"*** Wolves: {player.name} survived the attack because they are the elder")
+                            else:
+                                self.dead_this_night.add(player.name)
+                                await self.gm_channel.send(f"*** Wolves: {player.name} was killed by the wolves")
 
             # move to witch if there is one
             self.gamestate += 1

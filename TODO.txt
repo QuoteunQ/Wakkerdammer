@@ -5,6 +5,7 @@ Keep track of:
 - send messages to roles telling them it’s their time to act
 - add all commands to known_commands
 - add new roles to role_switch_dict
+- write role instructions to topics
 
 
 Soon:
@@ -15,11 +16,10 @@ Lynching
 
 - Win condition function; called on every death
 
-- write role instructions to topics
+- Check that slut, hunter, seer, can't target themselves
 
 - Mutilation
-
-- In werewolf channel topic add setting of mutilate on night 1
+  - In werewolf channel topic add setting of mutilate on night 1
 
 
 At some point:
@@ -30,8 +30,9 @@ At some point:
 - if player is mutilated, on status update check if they unmuted themselves, then remute them
 - in $leave : if in the middle of a game: “are you sure? This will kill you. If so, use $quit”
 - $remove to remove a player by the gm; same effect as $quit
-- GM can't use $join
+- GM can't use $join; maybe add debug mode where this isn't the case?
 - Custom death texts for each role
+
 
 Questions:
 - does the kidnapper kidnap just the target or everyone at the house (slut)
@@ -39,12 +40,8 @@ Questions:
  
 Edgecases:
 
-- Witch cannot heal a mutilation
 
 TOCHECK
-- GM end night before any ww votes
-- Pick after the vote is decided
-  - the picked tries to vote then? 
 
 
 Possibilities:
