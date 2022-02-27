@@ -219,7 +219,7 @@ async def on_message(message: discord.Message):
         return
 
     if message.content.startswith('$endhunter'):
-        game.end_hunter_hour()
+        await game.end_hunter_hour()
         return
 
 

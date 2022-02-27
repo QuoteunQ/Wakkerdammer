@@ -69,7 +69,7 @@ class WwGame():
             await msg.channel.send("No game setup taking place")
         else:
             if len(self.lobby) < min_players:
-                await msg.channel.send("Insufficient players")
+                await msg.channel.send(f"The minimum player count is {min_players}, but the lobby is currently only at {len(self.lobby)} players.")
             else:
                 roles = msg.content.split(' ')[1:]
                 for role in roles:
@@ -122,7 +122,8 @@ class WwGame():
             await self.gm_channel.send("The game isn't ready to start the wolf voting yet.")
         else:
             self.gamestate += 1
-            await self.gm_channel.send("Moving on to the wolves...")
+            await self.gm_channel.send("Moving on to the wolves..."
+                "(If you feel they are taking too much time voting you can use $endwolves to force the game to advance)")
             await self.wolf_channel.send("It's your turn to vote for tonight's kill now!")
             await self.town_square.send("It's now the wolves' turn to select a target...")
 
@@ -167,7 +168,8 @@ class WwGame():
             self.gamestate += 1
             if 'witch' in self.roles:
                 await self.town_square.send("The witch now has the oppurtunity to use her brews...")
-                await self.gm_channel.send("When you feel the witch has had enough time to use their potions, use $endnight to advance the game.")
+                await self.gm_channel.send("Moving on to the witch...\n"
+                    "When you feel the witch has had enough time to use their potions, use $endnight to advance the game.")
                 for witch in self.player_roles_objs['witch']:
                     await witch.role_channel.send("You can now use your potions!\n"
                         f"{self.dead_this_night} have died, {self.mute_this_night} have been mutilated.\n"
@@ -200,7 +202,7 @@ class WwGame():
                 await self.town_square.send("Everyone wakes up to a calm morning.")
 
             if self.gamestate != 5:     # if no hunter died
-                self.start_day_discussion()
+                await self.start_day_discussion()
 
             for name in self.alive:
                 player = self.player_names_objs[name]
@@ -224,10 +226,10 @@ class WwGame():
 
             if self.hunter_source_gs == 4:          # from end of night, go to day: discussion
                 self.hunter_source_gs = 0
-                self.start_day_discussion()
+                await self.start_day_discussion()
             elif self.hunter_source_gs == 7:        # from day voting, go to end of day
                 self.hunter_source_gs = 0
-                self.end_day()
+                await self.end_day()
 
 
     async def start_day_discussion(self):
@@ -411,7 +413,7 @@ class Player():
         if self.wolf:
             self.game.wolves.remove(self.name)
 
-        if self.role not in {'werewolf, picky_werewolf'} and self.wolf:
+        if self.role not in {'werewolf', 'picky_werewolf'} and self.wolf:
             await self.game.town_square.send(f"{self.name} died, they were the {self.role}, and they were the picked werewolf.")
         else:
             await self.game.town_square.send(f"{self.name} died, they were the {self.role}.")
@@ -441,6 +443,7 @@ class Hunter(Player):
         self.game.alive.remove(self.name)
 
         if self.wolf:
+            self.game.wolves.remove(self.name)
             await self.game.town_square.send(f"{self.name} died, they were the {self.role}, and they were the picked werewolf.")
         else:
             await self.game.town_square.send(f"{self.name} died, they were the {self.role}.")
