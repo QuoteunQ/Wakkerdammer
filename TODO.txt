@@ -16,9 +16,6 @@ Lynching
 
 - Win condition function; called on every death
 
-- check duplicate names in $join
-- check duplicate roles in $gamestart except for werewolf and civ
-
 - write role instructions to topics
 
 

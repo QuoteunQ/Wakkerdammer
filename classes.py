@@ -30,8 +30,10 @@ class WwGame():
     # ---------------------------- Gamestate-specific functions --------------------------------------------------
 
     async def join(self, msg: discord.Message):
-        """Called when a player types $join, takes the command message as input.
-           Lets the player join the lobby for the game if it is in setup phase, and their display_name doesn't contain any spaces."""
+        """Called when a player types $join, takes the command message as input. Lets the player join the lobby for the game if:
+        - the game is in setup phase
+        - their display_name doesn't contain any spaces
+        - their name isn't in the lobby yet"""
         if self.gamestate != 0:
             await msg.channel.send("No game setup taking place")
         else:
@@ -39,10 +41,13 @@ class WwGame():
             if ' ' in name:
                 await msg.channel.send("Please make sure there are no spaces in your nickname")
             else:
-                self.lobby.append(name)
-                self.ids[name] = msg.author.id
-                print(f"{name} has joined the game, playercount now at {len(self.lobby)}")
-                await self.town_square.send(f"{name} has joined the game, playercount now at {len(self.lobby)}")
+                if name in self.lobby:
+                    await msg.channel.send("You're already in the lobby bruh")
+                else:
+                    self.lobby.append(name)
+                    self.ids[name] = msg.author.id
+                    print(f"{name} has joined the game, playercount now at {len(self.lobby)}")
+                    await self.town_square.send(f"{name} has joined the game, playercount now at {len(self.lobby)}")
 
     
     async def leave(self, msg: discord.Message):
