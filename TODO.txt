@@ -8,7 +8,7 @@ Keep track of:
 
 
 Soon:
-- in lover suicide: add to self.dead_this_night?
+
 
 Lynching
 - print statement and channel message in $lynch to make clear
@@ -18,6 +18,8 @@ Lynching
 
 - check duplicate names in $join
 - check duplicate roles in $gamestart except for werewolf and civ
+
+- write role instructions to topics
 
 
 At some point:
@@ -31,7 +33,7 @@ At some point:
 - GM can't use $join
 - Custom death texts for each role
 
-Questions
+Questions:
 - does the kidnapper kidnap just the target or everyone at the house (slut)
 
  

@@ -3,11 +3,11 @@ import discord
 import requests
 import json
 from textwrap import dedent
-from classes import ww_game
+from classes import WwGame
 from static_variables import client, min_players, possible_roles, gskey, known_commands
 
 
-games: 'dict[int, ww_game]' = {}                  # dict with < guild_id : game object >
+games: 'dict[int, WwGame]' = {}                  # dict with < guild_id : game object >
 
 
 
@@ -60,7 +60,7 @@ async def on_message(message: discord.Message):
             if not town_square_channel:
                 town_square_channel = await message.guild.create_text_channel(name='town_square')
                 await town_square_channel.send("I've created this channel for all non-secret communication about the game.")
-            new_game = ww_game(message.guild, message.author)
+            new_game = WwGame(message.guild, message.author)
             overwritesgm = {
                 message.guild.default_role: discord.PermissionOverwrite(read_messages=False),
                 message.author: discord.PermissionOverwrite(read_messages=True),
@@ -131,13 +131,19 @@ async def on_message(message: discord.Message):
         return
 
     if message.content.startswith('$pick'):
-        if await game.valid_target(message, req_role='picky werewolf', req_gs=2):
+        if await game.valid_target(message, req_role='picky_werewolf', req_gs=2):
             await game.player_names_objs[message.author.display_name].pick_wolf(message)
         return
 
     if message.content.startswith('$lunch'):
         if await game.valid_target(message, req_role='wolf', req_gs=3):
             await game.player_names_objs[message.author.display_name].vote_lunch(message)
+        return
+
+    if message.content.startswith('$potion '):
+        message.content = message.content[8:]       # split off the '$potion ' part to make valid_target and use_potion handle the message as 'heal/kill/mute target_name'
+        if await game.valid_target(message, req_role='witch', req_gs=4):
+            await game.player_names_objs[message.author.display_name].use_potion(message)
         return
 
 
@@ -199,11 +205,11 @@ async def on_message(message: discord.Message):
         await game.begin_night()
         return
     
-    if message.content.startswith('$startwolfvoting'):
+    if message.content.startswith('$startwolves'):
         await game.start_wolf_vote()
         return
 
-    if message.content.startswith('$endwolfvoting'):
+    if message.content.startswith('$endwolves'):
         await game.wolf_channel.send("The gamemaster has decided to end your voting, calculating the target now...")
         await game.end_wolf_vote()
         return
@@ -213,7 +219,7 @@ async def on_message(message: discord.Message):
         return
 
     if message.content.startswith('$endhunter'):
-        game.end_hunter_hour()
+        await game.end_hunter_hour()
         return
 
 
