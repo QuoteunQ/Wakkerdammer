@@ -136,6 +136,7 @@ class WwGame():
 
     async def end_wolf_vote(self):
         """Called when all wolves have voted or the gamemaster uses $endwolves. Calculates who the wolf target is and attempts to kill them.
+        If wolf_mute_night_1 is set to False and it's the first night, sets the target to be mutilated instead of killed.
         Assumes valid_target has already been called for each individual wolf's vote. Also advances the gamestate to night: witch (4) if there is a witch in the game,
         otherwise ends the night by calling handle_end_night() automatically."""
         if self.gamestate != 3:
@@ -150,12 +151,12 @@ class WwGame():
 
             if max(wolf_votes.values()) == 0:
                 await self.gm_channel.send("*** Wolves: no votes were cast, no wolf target")
-                await self.wolf_channel.send("No votes were cast, which means no one dies by your hand tonight.")
+                await self.wolf_channel.send("No votes were cast, which means your fangs remain bloodless tonight.")
             else:
                 # stalemate:
                 if list(wolf_votes.values()).count(max(wolf_votes.values())) > 1:
                     await self.gm_channel.send("*** Wolves: Stalemate in lunch voting, no wolf target")
-                    await self.wolf_channel.send("Stalemate in voting, no lunch tonight rippp")
+                    await self.wolf_channel.send("Stalemate in voting, which means your fangs remain bloodless tonight.")
                 
                 else:
                     target = self.player_names_objs[max(wolf_votes, key=wolf_votes.get)]
@@ -171,8 +172,12 @@ class WwGame():
                                 player.elder_prot = False
                                 await self.gm_channel.send(f"*** Wolves: {player.name} survived the attack because they are the elder")
                             else:
-                                self.dead_this_night.add(player.name)
-                                await self.gm_channel.send(f"*** Wolves: {player.name} was killed by the wolves")
+                                if settings['wolf_mute_night_1'] and self.night_count == 1:
+                                    self.mute_this_night.add(player.name)
+                                    await self.gm_channel.send(f"*** Wolves: {player.name} was mutilated by the wolves")
+                                else:
+                                    self.dead_this_night.add(player.name)
+                                    await self.gm_channel.send(f"*** Wolves: {player.name} was killed by the wolves")
 
             # move to witch if there is one
             self.gamestate += 1
@@ -442,8 +447,8 @@ class Player():
                 await self.game.town_square.send(f"{lover.name} tragically chooses to end their life after they find out that {self.name} has died.")
         
     async def mutilate(self):
-        # maybe have it mute the player in the voice (and text?) channel(s)?
         self.mutilated = True
+        await self.role_channel.send("You have been mutilated! Please refrain from speaking in voice, as well as conveying words through text channels.")
         await self.game.town_square.send(f"{self.name} was mutilated.")
 
 
@@ -686,13 +691,15 @@ class Witch(Player):
 
         elif potion == 'mute':
             if self.potions['mute']:
-                if name not in self.game.mute_this_night:
+                if self.game.player_names_objs[name].mutilated:
+                    await self.role_channel.send("That person has already been mutilated, so no use doing it twice! Please pick someone else.")
+                elif name in self.game.mute_this_night:
+                    await self.role_channel.send("That person has already been mutilated tonight, so no use doing it twice! You can try to use your mutilating potion again if you wish.")
+                else:
                     self.game.mute_this_night.add(name)
                     self.potions['mute'] -= 1
                     await self.role_channel.send(f"The acidic brew eats away {name}'s tongue, they will never speak again.")
                     await self.game.gm_channel.send(f"*** Witch: {self.name} has mutilated {name}.")
-                else:
-                    await self.role_channel.send("That person has already been mutilated tonight, so no use doing it twice! You can try to use your mutilating potion again if you wish.")
             else:
                 await self.role_channel.send("You don't have any mutilating potions left!")
 

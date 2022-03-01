@@ -26,9 +26,9 @@ known_commands = {
 }
 
 # Set specific settings for the games:
-# - If kill_first is False, wolves mutilate on night 1
+# - If wolf_mute_night_1 is True, wolves mutilate on night 1
 # - If lovers_on_night_1 is True, the lovers can only be made on night 1
-settings = {'kill_first': True, 'lovers_on_night_1': True}
+settings = {'wolf_mute_night_1': True, 'lovers_on_night_1': True}
 
 topics = {
     'kidnapper':
@@ -84,7 +84,8 @@ topics = {
         "For questions please @ the gamemaster. Type $help to see other commands.",
     'werewolves':
         "- Welcome to the werewolves groupchat! This channel will be used for discussing the game amongst yourselves, "
-        "as well as casting your individual votes for each night's kill.",
+        "as well as casting your individual votes for each night's kill. For this game, "
+        f"the setting that you mutilate instead of kill your target during the first night is set to: {settings['wolf_mute_night_1']}",
     'lovers':
         "- Welcome! You've been made lovers by our dear cupid. Feel free to get acquainted in this channel."
 }
