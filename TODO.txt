@@ -10,15 +10,17 @@ Keep track of:
 
 Soon:
 
-Lynching
-- print statement and channel message in $lynch to make clear
-  how many players have voted
+- Lynching
+  - print statement and channel message in $lynch to make clear how many players have voted
 
 - Win condition function; called on every death
 
-- Check that slut, hunter, seer, can't target themselves
+- Seer
+  - Check that seer can't target themselves
 
 - Mutilation
+  - expand player.mutilate with role channel message
+  - In wolf kill add option of mutilation on night 1
   - In werewolf channel topic add setting of mutilate on night 1
 
 
@@ -31,7 +33,12 @@ At some point:
 - in $leave : if in the middle of a game: “are you sure? This will kill you. If so, use $quit”
 - $remove to remove a player by the gm; same effect as $quit
 - GM can't use $join; maybe add debug mode where this isn't the case?
+
+Possibilities:
 - Custom death texts for each role
+- mute players during night
+- Automatic checks on whether all roles have performed their actions for a certain gs?
+- timer on voting
 
 
 Questions:
@@ -39,12 +46,3 @@ Questions:
 
  
 Edgecases:
-
-
-TOCHECK
-
-
-Possibilities:
-- mute players during night
-- Automatic checks on whether all roles have performed their actions for a certain gs?
-- timer on voting

@@ -65,13 +65,13 @@ class WwGame():
                 await msg.channel.send("No need, you weren't even in the game yet!")
 
 
-    # ---------------------------------- Gamestate flow control functions --------------------------------------------------------
+        # -------------------------------- Gamestate flow control functions ---------------------------------------------------
 
     async def start(self, msg: discord.Message):
         """Starts the game with the roles included in the $gamestart command message. This changes the gamestate from setup (0) to end of day (1),
         ready to begin the first night."""
         if self.gamestate != 0:
-            await msg.channel.send("No game setup taking place")
+            await msg.channel.send("The game is unable to start outside of the setup phase.")
         else:
             if len(self.lobby) < min_players:
                 await msg.channel.send(f"The minimum player count is {min_players}, but the lobby is currently only at {len(self.lobby)} players.")
@@ -94,7 +94,8 @@ class WwGame():
                         f"The wolves are {self.wolves}.\n"
                         "Ready for $beginnight !")
                     await self.town_square.send(
-                        "Game started! Please check if you have been added to a text channel, and that you are clear on your role and how to play it.\n"
+                        "Game started! Please check if you have been added to a personal text channel, which will tell you your role. "
+                        "You'll find instructions on how to play your role in the topic description of the channel.\n"
                         "The gamemaster can start the night using $beginnight")
                     self.gamestate += 1
 
@@ -103,7 +104,7 @@ class WwGame():
         """Sets the gamestate to night: pre-wolves (2) if the gamestate is day end (1) and sends the appropriate messages to town_square
         and the channels of the roles which act in the night before the wolves."""
         if self.gamestate != 1:
-            await self.gm_channel.send("The game is not ready to begin the night yet.")
+            await self.gm_channel.send(f"The game is not ready to begin the night during this state of the game ({gskey[self.gamestate]}).")
         else:
             self.gamestate += 1
             self.night_count += 1
@@ -124,7 +125,7 @@ class WwGame():
     async def start_wolf_vote(self):
         """Advances the game to the night: wolves gamestate (3). Called when the gamemaster uses $startwolves."""
         if self.gamestate != 2:
-            await self.gm_channel.send("The game isn't ready to start the wolf voting yet.")
+            await self.gm_channel.send(f"The game isn't ready to start the wolf voting during this state of the game ({gskey[self.gamestate]}).")
         else:
             self.gamestate += 1
             await self.gm_channel.send("Moving on to the wolves..."
@@ -196,7 +197,7 @@ class WwGame():
            - Resetting game- and player-level temporary night variables
            - Changing gamestate to day: discussion (6) if no hunter died"""
         if self.gamestate != 4:
-            await self.gm_channel.send("The game is not ready to end the night yet")
+            await self.gm_channel.send(f"The game is not ready to end the night during this state of the game ({gskey[self.gamestate]})")
         else:
             await self.town_square.send("Dawn is on the horizon...")
             if len(self.dead_this_night) > 0 or len(self.mute_this_night) > 0:
@@ -242,15 +243,21 @@ class WwGame():
 
 
     async def start_day_discussion(self):
-        self.gamestate = 6
-        await self.town_square.send("Time to discuss who you want to lynch tonight!")
-        await self.gm_channel.send("When you feel the day discussion has lasted long enough, you can use $startvoting to start the day vote.")
+        if self.gamestate != 4 or self.gamestate != 5:
+            await self.gm_channel.send(f"The game is unable to move to day: discussion during this state of the game ({gskey[self.gamestate]}).")
+        else:
+            self.gamestate = 6
+            await self.town_square.send("Time to discuss who you want to lynch tonight!")
+            await self.gm_channel.send("When you feel the day discussion has lasted long enough, you can use $startvoting to start the day vote.")
 
 
     async def end_day(self):
-        self.gamestate = 1
-        await self.gm_channel.send("Ready for $beginnight !")
-        await self.town_square.send("The gamemaster can now begin the night.")
+        if self.gamestate != 5 or self.gamestate != 7:
+            await self.gm_channel.send(f"The game is unable to move to day: discussion during this state of the game ({gskey[self.gamestate]}).")
+        else:
+            self.gamestate = 1
+            await self.gm_channel.send("Ready for $beginnight !")
+            await self.town_square.send("The gamemaster can now begin the night.")
 
 
     async def distribute_roles(self):
@@ -500,7 +507,9 @@ class Kidnapper(Player):
             await self.role_channel.send("You've already kidnapped someone tonight.")
         else:
             name = msg.content.split(' ')[1]
-            if name == self.prev_target:
+            if name == self.name:
+                await self.role_channel.send("You can't choose yourself!")
+            elif name == self.prev_target:
                 await self.role_channel.send("You can't choose the same target twice in a row. Please choose someone else.")
             else:
                 kidnappee = self.game.player_names_objs[name]
@@ -527,7 +536,9 @@ class Cupid(Player):
             await self.role_channel.send("You've already found a place to sleep tonight.")
         else:
             name = msg.content.split(' ')[1]
-            if name == self.prev_target:
+            if name == self.name:
+                await self.role_channel.send("You can't choose yourself!")
+            elif name == self.prev_target:
                 await self.role_channel.send("You can't choose the same target twice in a row. Please choose someone else.")
             else:
                 host = self.game.player_names_objs[name]
