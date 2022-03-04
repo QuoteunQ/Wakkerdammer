@@ -16,6 +16,7 @@ gskey =  {
     6:'day: discussion',
     7:'day: voting'
 }
+
 known_commands = {
     '$hello', '$inspire', '$help', '$allroles',                                                     # commands not influencing a game
     '$gamesetup', '$join', '$leave',                                                                # game setup
@@ -27,12 +28,6 @@ known_commands = {
     '$startvoting', '$endvoting'
 }
 
-# Set specific settings for the games:
-# - If wolf_mute_night_1 is True, wolves mutilate on night 1
-# - If wolf_mute_target_only is True, the wolves only mutilate their target, instead of everyone present at the house
-# - If lovers_on_night_1 is True, the lovers can only be made on night 1
-settings = {'wolf_mute_night_1': True, 'wolf_mute_target_only': True, 'lovers_on_night_1': True}
-
 topics = {
     'kidnapper':
         "- You are the kidnapper! During nights type $kidnap <player name> to kidnap someone. "
@@ -41,7 +36,7 @@ topics = {
         "For questions please @ the gamemaster. Type $help to see other commands.",
     'cupid':
         "- You are cupid! During nights type $sleepat <player name> to stay over at someone's house. "
-        f"Make the lover couple using $lovers <player name 1> <player name 2>. The setting that you can only make lovers on night 1 is set to: {settings['lovers_on_night_1']}. "
+        "Make the lover couple using $lovers <player name 1> <player name 2>. The setting that you can only make lovers on night 1 is set to: {}. "
         "You can vote for someone during days using $lynch <player name>. "
         "For questions please @ the gamemaster. Type $help to see other commands.",
     'protector':
@@ -88,7 +83,12 @@ topics = {
     'werewolves':
         "- Welcome to the werewolves groupchat! This channel will be used for discussing the game amongst yourselves, "
         "as well as casting your individual votes for each night's kill. For this game, "
-        f"the setting that you mutilate instead of kill your target during the first night is set to: {settings['wolf_mute_night_1']}",
+        "the setting that you mutilate instead of kill your target during the first night is set to: {}",
     'lovers':
-        "- Welcome! You've been made lovers by our dear cupid. Feel free to get acquainted in this channel."
+        "- Welcome! You've been made lovers by our dear cupid. Feel free to get acquainted in this channel.",
+    'gamemaster':
+        "- In this channel you as gamemaster will see updates about what's happening in the game. "
+        "You can also use it to start the game without revealing the roles in the game to the players. "
+        "Your commands to control the game include: '$gamestart', '$clearplayerlist', '$beginnight', '$startwolves', '$endwolves', "
+        "'$endnight', '$endhunter', '$startvoting', '$endvoting'."
 }

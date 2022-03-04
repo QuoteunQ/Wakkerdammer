@@ -1,6 +1,6 @@
 import discord
 import random
-from static_variables import client, min_players, possible_roles, settings, gskey, topics
+from static_variables import client, min_players, possible_roles, gskey, topics
 
 
 class WwGame():
@@ -21,10 +21,17 @@ class WwGame():
         self.mute_this_night = set()                                                                    # set of display_names of players who are set to be muted at the end of this night
         self.wolves = set()                                                                             # set of ALIVE player names in the wolf team
         self.hunter_source_gs = 0                                                                       # the gamestate the hunter(s) died in, which determines which gs to continue to once the hunters are done
+        
         self.town_square: discord.TextChannel = discord.utils.get(guild.channels, name='town_square')
         self.wolf_channel: discord.TextChannel = None
         self.lovers_channel: discord.TextChannel = None
         self.gm_channel: discord.TextChannel = None                                                     # text channel for gm for info about what's happening in the game
+
+        # Set specific settings for the game:
+        # - If wolf_mute_night_1 is True, wolves mutilate on night 1
+        # - If wolf_mute_target_only is True, the wolves only mutilate their target, instead of everyone present at the house
+        # - If lovers_on_night_1 is True, the lovers can only be made on night 1
+        self.settings = {'wolf_mute_night_1': True, 'wolf_mute_target_only': True, 'lovers_on_night_1': True}
 
 
     # ---------------------------- Gamestate-specific functions --------------------------------------------------
@@ -172,8 +179,8 @@ class WwGame():
                                 player.elder_prot = False
                                 await self.gm_channel.send(f"*** Wolves: {player.name} survived the attack because they are the elder")
                             else:
-                                if settings['wolf_mute_night_1'] and self.night_count == 1:
-                                    if settings['wolf_mute_target_only'] and player.name != target.name:
+                                if self.settings['wolf_mute_night_1'] and self.night_count == 1:
+                                    if self.settings['wolf_mute_target_only'] and player.name != target.name:
                                         pass
                                     else:
                                         self.mute_this_night.add(player.name)
@@ -347,12 +354,14 @@ class WwGame():
                 self.gm: discord.PermissionOverwrite(read_messages=True),
                 client.user: discord.PermissionOverwrite(read_messages=True)
             }
-            new_player.role_channel = await self.guild.create_text_channel(name=role, overwrites=overwrites, topic=topics[role])
+            new_player.role_channel = await self.guild.create_text_channel(name=role, overwrites=overwrites,
+                topic=topics[role].format(self.settings['lovers_on_night_1']))      # currently only cupid has a need & space for formatting
 
             if role in {'werewolf', 'picky_werewolf'}:
                 overwrites_ww[self.guild.get_member(self.ids[participant])] = discord.PermissionOverwrite(read_messages=True)
 
-        self.wolf_channel = await self.guild.create_text_channel(name='werewolves', overwrites=overwrites_ww, topic=topics['werewolves'])
+        self.wolf_channel = await self.guild.create_text_channel(name='werewolves', overwrites=overwrites_ww,
+            topic=topics['werewolves'].format(self.settings['wolf_mute_night_1']))
         print("All channels besides lovers channel created")
 
 
@@ -623,7 +632,7 @@ class Cupid(Player):
     
     async def make_lovers(self, msg: discord.Message):
         """Given a $lovers command message, make the players given by the names in the message lovers and create a secret channel for them."""
-        if settings['lovers_on_night_1'] and self.game.night_count != 1:
+        if self.game.settings['lovers_on_night_1'] and self.game.night_count != 1:
             await self.role_channel.send("You can only choose lovers on the first night")
         else:
             if self.charges:
