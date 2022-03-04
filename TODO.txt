@@ -11,7 +11,7 @@ Keep track of:
 Soon:
 
 - Lynching
-  - print statement and channel message in $lynch to make clear how many players have voted
+  - game.end_day_vote() based on game.end_wolf_vote()
 
 - Win condition function; called on every death
 
@@ -38,7 +38,6 @@ Possibilities:
 
 
 Questions:
-- does the kidnapper kidnap just the target or everyone at the house (slut)
 - does the elder protect against mutilation by the wolves
 
  

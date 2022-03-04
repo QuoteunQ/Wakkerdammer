@@ -8,7 +8,7 @@ min_players = 1
 possible_roles = {'werewolf', 'picky_werewolf', 'cupid', 'kidnapper', 'protector', 'seer', 'witch', 'hunter', 'elder', 'fool', 'civilian'}
 gskey =  {
     0:'setup',
-    1: 'end of day',
+    1:'end of day',
     2:'night: pre-wolves',
     3:'night: wolves',
     4:'night: witch',
@@ -19,16 +19,19 @@ gskey =  {
 known_commands = {
     '$hello', '$inspire', '$help', '$allroles',                                                     # commands not influencing a game
     '$gamesetup', '$join', '$leave',                                                                # game setup
-    '$kidnap', '$protect', '$shoot', '$lovers', '$sleepat', '$pick', '$lunch', '$potion',            # night commands players
+    '$kidnap', '$protect', '$shoot', '$lovers', '$sleepat', '$pick', '$lunch', '$potion',           # player commands
+    '$lynch',
     '$playerlist', '$poopbreak', '$roles', '$gamestate', '$gm', '$alive',                           # utility commands
     '$clearplayerlist', '$gamestart', '$gamereset',                                                 # game control gamemaster
     '$beginnight', '$startwolves', '$endwolves', '$endnight', '$endhunter'                          # gamestate flow control gamemaster
+    '$startvoting', '$endvoting'
 }
 
 # Set specific settings for the games:
 # - If wolf_mute_night_1 is True, wolves mutilate on night 1
+# - If wolf_mute_target_only is True, the wolves only mutilate their target, instead of everyone present at the house
 # - If lovers_on_night_1 is True, the lovers can only be made on night 1
-settings = {'wolf_mute_night_1': True, 'lovers_on_night_1': True}
+settings = {'wolf_mute_night_1': True, 'wolf_mute_target_only': True, 'lovers_on_night_1': True}
 
 topics = {
     'kidnapper':

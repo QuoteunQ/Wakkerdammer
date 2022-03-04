@@ -103,7 +103,7 @@ async def on_message(message: discord.Message):
         return
 
 
-# ---------------------------- Night Commands Players -----------------------------------
+# ---------------------------- Player commands ---------------------------------------------
 
     if message.content.startswith('$kidnap'):
         if await game.valid_target(message, req_role='kidnapper', req_gs=2):
@@ -141,10 +141,15 @@ async def on_message(message: discord.Message):
         return
 
     if message.content.startswith('$potion '):
-        message.content = message.content[8:]       # split off the '$potion ' part to make valid_target and use_potion handle the message as 'heal/kill/mute target_name'
+        # split off the '$potion ' part to make valid_target and use_potion handle the message as 'heal/kill/mute target_name'
+        message.content = message.content[8:]
         if await game.valid_target(message, req_role='witch', req_gs=4):
             await game.player_names_objs[message.author.display_name].use_potion(message)
         return
+
+    if message.content.startswith('$lynch'):
+        if await game.valid_target(message, req_role='civilian', req_gs=7):
+            await game.player_names_objs[message.author.display_name].day_vote(message)
 
 
 # ------------------------------ Utility commands -------------------------------------
@@ -220,6 +225,14 @@ async def on_message(message: discord.Message):
 
     if message.content.startswith('$endhunter'):
         await game.end_hunter_hour()
+        return
+    
+    if message.content.startswith('$startvoting'):
+        await game.start_day_vote()
+        return
+
+    if message.content.startswith('$endvoting'):
+        await game.end_day_vote()
         return
 
 
