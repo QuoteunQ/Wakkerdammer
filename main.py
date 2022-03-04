@@ -173,6 +173,10 @@ async def on_message(message: discord.Message):
         await message.channel.send(f"Alive players are: {game.alive}")
         return
 
+    if message.content.startswith('$settings'):
+        await message.channel.send(f"Settings for this game are {game.settings}")
+        return
+
 
 # ----------------------- Commands which can only be used by the gamemaster ------------------------------------
 
@@ -187,6 +191,10 @@ async def on_message(message: discord.Message):
             await message.channel.send("Player list is now empty")
         else:
             await message.channel.send("You can't do that outside of game setup")
+        return
+
+    if message.content.startswith('$changesetting'):
+        await game.changesetting(message)
         return
 
     if message.content.startswith('$gamestart'):

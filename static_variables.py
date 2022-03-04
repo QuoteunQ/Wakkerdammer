@@ -14,8 +14,8 @@ known_commands = {
     '$gamesetup', '$join', '$leave',                                                                # game setup
     '$kidnap', '$protect', '$shoot', '$lovers', '$sleepat', '$pick', '$lunch', '$potion',           # player commands
     '$lynch',
-    '$playerlist', '$poopbreak', '$roles', '$gamestate', '$gm', '$alive',                           # utility commands
-    '$clearplayerlist', '$gamestart', '$gamereset',                                                 # game control gamemaster
+    '$playerlist', '$poopbreak', '$roles', '$gamestate', '$gm', '$alive', '$settings',              # utility commands
+    '$clearplayerlist', '$changesetting', '$gamestart', '$gamereset',                               # game control gamemaster
     '$beginnight', '$startwolves', '$endwolves', '$endnight', '$endhunter',                         # gamestate flow control gamemaster
     '$startvoting', '$endvoting'
 }

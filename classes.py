@@ -72,6 +72,16 @@ class WwGame():
                 await msg.channel.send("No need, you weren't even in the game yet!")
 
 
+    async def changesetting(self, msg: discord.Message):
+        """Called when the gamemaster uses $changesetting, flips the bool value of the key in self.settings given by the content of msg."""
+        if self.gamestate != 'setup':
+            await msg.channel.send("You can't change a setting outside of game setup.")
+        else:
+            setting = msg.content.split(' ')[1]
+            self.settings[setting] = not self.settings[setting]
+            await msg.channel.send(f"The setting {setting} has been changed to {self.settings[setting]}.")
+
+
         # -------------------------------- Gamestate flow control functions ---------------------------------------------------
 
     async def start(self, msg: discord.Message):
