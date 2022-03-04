@@ -16,7 +16,7 @@ known_commands = {
     '$lynch',
     '$playerlist', '$poopbreak', '$roles', '$gamestate', '$gm', '$alive',                           # utility commands
     '$clearplayerlist', '$gamestart', '$gamereset',                                                 # game control gamemaster
-    '$beginnight', '$startwolves', '$endwolves', '$endnight', '$endhunter'                          # gamestate flow control gamemaster
+    '$beginnight', '$startwolves', '$endwolves', '$endnight', '$endhunter',                         # gamestate flow control gamemaster
     '$startvoting', '$endvoting'
 }
 
