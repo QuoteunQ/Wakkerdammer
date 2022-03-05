@@ -9,7 +9,6 @@ Keep track of:
 
 
 Soon:
-- Win condition function; called on every death
 
 - Seer
   - Check that seer can't target themselves

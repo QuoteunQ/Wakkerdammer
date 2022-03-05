@@ -7,7 +7,7 @@ client = discord.Client(intents=intents)
 min_players = 1
 possible_roles = {'werewolf', 'picky_werewolf', 'cupid', 'kidnapper', 'protector', 'seer', 'witch', 'hunter', 'elder', 'fool', 'civilian'}
 
-# gamestates: 'setup', 'end of day', 'night: pre-wolves', 'night: wolves', 'night: witch', 'day: hunter', 'day: discussion', 'day: voting'}
+# gamestates: 'setup', 'end of day', 'night: pre-wolves', 'night: wolves', 'night: witch', 'day: hunter', 'day: discussion', 'day: voting', 'finished'
 
 known_commands = {
     '$hello', '$inspire', '$help', '$allroles',                                                     # commands not influencing a game
@@ -81,6 +81,6 @@ topics = {
     'gamemaster':
         "- In this channel you as gamemaster will see updates about what's happening in the game. "
         "You can also use it to start the game without revealing the roles in the game to the players. "
-        "Your commands to control the game include: '$gamestart', '$clearplayerlist', '$beginnight', '$startwolves', '$endwolves', "
-        "'$endnight', '$endhunter', '$startvoting', '$endvoting'."
+        "Your commands to control the game include: '$gamestart', '$clearplayerlist', '$changesetting', '$beginnight', "
+        "'$startwolves', '$endwolves', '$endnight', '$endhunter', '$startvoting', '$endvoting'."
 }

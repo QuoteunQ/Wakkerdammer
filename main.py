@@ -87,7 +87,38 @@ async def on_message(message: discord.Message):
     game = games[message.guild.id]
 
 
-# ------------------------------------ Game join & leave ------------------------------------------
+    # ------------------------------ Utility commands -------------------------------------
+
+    if message.content.startswith('$playerlist'):
+        await message.channel.send(f"Players: {game.lobby}")
+        return
+
+    if message.content.startswith('$poopbreak'):
+        await message.channel.send("Aren't you a funnyman https://www.youtube.com/watch?v=DN0gAQQ7FAQ")
+        return
+
+    if message.content.startswith('$roles'):
+        await message.channel.send(f"Roles included in this game are: {game.roles}")
+        return
+
+    if message.content.startswith('$gamestate'):
+        await message.channel.send(f"State of game: {game.gamestate}")
+        return
+
+    if message.content.startswith('$gm'):
+        await message.channel.send(f"Current GM is: {game.gm.display_name}")
+        return
+
+    if message.content.startswith('$alive'):
+        await message.channel.send(f"Alive players are: {game.alive}")
+        return
+
+    if message.content.startswith('$settings'):
+        await message.channel.send(f"Settings for this game are {game.settings}")
+        return
+
+
+    # ------------------------------------ Game join & leave ------------------------------------------
 
     if message.content.startswith('$join'):
         await game.join(message)
@@ -98,7 +129,7 @@ async def on_message(message: discord.Message):
         return
 
 
-# ---------------------------- Player commands ---------------------------------------------
+    # ---------------------------- Player commands ---------------------------------------------
 
     if message.content.startswith('$kidnap'):
         if await game.valid_target(message, req_role='kidnapper', req_gs='night: pre-wolves'):
@@ -147,38 +178,7 @@ async def on_message(message: discord.Message):
             await game.player_names_objs[message.author.display_name].day_vote(message)
 
 
-# ------------------------------ Utility commands -------------------------------------
-
-    if message.content.startswith('$playerlist'):
-        await message.channel.send(f"Players: {game.lobby}")
-        return
-
-    if message.content.startswith('$poopbreak'):
-        await message.channel.send("Aren't you a funnyman https://www.youtube.com/watch?v=DN0gAQQ7FAQ")
-        return
-
-    if message.content.startswith('$roles'):
-        await message.channel.send(f"Roles included in this game are: {game.roles}")
-        return
-
-    if message.content.startswith('$gamestate'):
-        await message.channel.send(f"State of game: {game.gamestate}")
-        return
-
-    if message.content.startswith('$gm'):
-        await message.channel.send(f"Current GM is: {game.gm.display_name}")
-        return
-
-    if message.content.startswith('$alive'):
-        await message.channel.send(f"Alive players are: {game.alive}")
-        return
-
-    if message.content.startswith('$settings'):
-        await message.channel.send(f"Settings for this game are {game.settings}")
-        return
-
-
-# ----------------------- Commands which can only be used by the gamemaster ------------------------------------
+    # ----------------------- Commands which can only be used by the gamemaster ------------------------------------
 
     if message.author != game.gm:
         await message.channel.send("Relax bro you're not the GM")

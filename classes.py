@@ -449,6 +449,30 @@ class WwGame():
         else: return True
 
 
+    async def check_win_cond(self):
+        """Called on every player death. Checks whether one of the win conditions for the game has been met. These include:
+        all remaining players are wolves, there are no more wolves left, the remaining players are a civilian-wolf couple."""
+        if not self.gamestate == 'finished':
+            if self.wolves == self.alive:
+                self.gamestate = 'finished'
+                await self.town_square.send("With the last innocent civilian hunted and devoured, the werewolves have conquered this town for themselves."
+                    "People say that howls echo among the buildings every night now, but who's to say they haven't moved on to the next town?\n"
+                    "The wolves have won this game!")
+            elif len(self.wolves) == 0:
+                self.gamestate = 'finished'
+                await self.town_square.send("With the last werewolf found and killed, the town is safe once more. But at what cost?\n"
+                    "The civilians have won this game!")
+            elif (len(self.alive) == 2 and self.player_names_objs[self.alive[0]].name in self.player_names_objs[self.alive[1]].lover_names and
+                self.player_names_objs[self.alive[1]].name in self.player_names_objs[self.alive[0]].lover_names):
+                self.gamestate = 'finished'
+                await self.town_square.send("Love conquers all, even when one has lycanthropy, and has been secretly devouring their and "
+                    "their lover's own neighbours every night.\n"
+                    "The lovers have won this game together!")
+            elif len(self.alive) == 0:
+                self.gamestate = 'finished'
+                await self.town_square.send("The town stands quiet, not a soul in sight. It has become a ghost town, and will always remain so.\n"
+                    "Everyone has died, which means the game is now finished!")
+
 # ----------------- Role classes -------------------------------
 class Player():
     def __init__(self, game: WwGame, name: str):
@@ -464,12 +488,12 @@ class Player():
 
         # statuses which reset every night
         self.house_prot = False
-        self.at_home = [name]                               # list of players who are at this player's house
+        self.at_home = {name}                               # list of players who are at this player's house
         self.role_performed = False
 
     def reset_night_statuses(self):
         self.house_prot = False
-        self.at_home = [self.name]
+        self.at_home = {self.name}
         self.role_performed = False
 
     async def die(self):
@@ -484,14 +508,16 @@ class Player():
             await self.game.town_square.send(f"{self.name} died, they were the {self.role}, and they were the picked werewolf.")
         else:
             await self.game.town_square.send(f"{self.name} died, they were the {self.role}.")
-            
+
         # if there are any lovers, kill them too
-        for name in self.lover_names.copy():
+        for name in self.lover_names:
             lover = self.game.player_names_objs[name]
             if lover.is_alive:
                 await lover.die()
                 await self.game.town_square.send(f"{lover.name} tragically chooses to end their life after they find out that {self.name} has died.")
-        
+
+        await self.game.check_win_cond()
+
     async def mutilate(self):
         self.mutilated = True
         await self.role_channel.send("You have been mutilated! Please refrain from speaking in voice, as well as conveying words through text channels.")
@@ -553,7 +579,6 @@ class Hunter(Player):
             await self.game.town_square.send(f"{self.name} died, they were the {self.role}, and they were the picked werewolf.")
         else:
             await self.game.town_square.send(f"{self.name} died, they were the {self.role}.")
-        await self.game.town_square.send(f"{self.name} will now get to decide who they take with them to the grave.")
             
         # if there are any lovers, kill them too
         for name in self.lover_names:
@@ -562,11 +587,15 @@ class Hunter(Player):
                 await lover.die()
                 await self.game.town_square.send(f"{lover.name} tragically chooses to end their life after they find out that {self.name} has died.")
 
-        if self.game.gamestate != 'day: hunter':
-            self.game.hunter_source_gs = self.game.gamestate
-            self.game.gamestate = 'day: hunter'
-            await self.game.gm_channel.send("Please wait for the hunter(s) to select their target. If you want to force the game to advance, use $endhunter")
-        self.loaded = True
+        await self.game.check_win_cond()
+
+        if self.game.gamestate != 'finished':
+            if self.game.gamestate != 'day: hunter':
+                self.game.hunter_source_gs = self.game.gamestate
+                self.game.gamestate = 'day: hunter'
+                await self.game.gm_channel.send("Please wait for the hunter(s) to select their target. If you want to force the game to advance, use $endhunter")
+            await self.game.town_square.send(f"{self.name} will now get to decide who they take with them to the grave.")
+            self.loaded = True
 
     async def hunt(self, msg: discord.Message):
         """Given a $shoot command message, kill the player given by the name in the message."""
@@ -606,7 +635,7 @@ class Kidnapper(Player):
                 self.prev_target = target_name
                 await self.role_channel.send(f"You have set the kidnap target to be {target_name}")
                 for name in target.at_home:
-                    self.at_home.append(name)
+                    self.at_home.add(name)
                     kidnappee = self.game.player_names_objs[name]
                     kidnappee.at_home.remove(kidnappee.name)
                     await self.game.gm_channel.send(f"*** Kidnapper: {self.name} has kidnapped {name} from {target_name}'s house.")
@@ -635,7 +664,7 @@ class Cupid(Player):
                 await self.role_channel.send(f"You have set your host target to be {name}")
                 if self.name in self.at_home:               # if cupid was not kidnapped before trying to sleep somewhere
                     self.at_home.remove(self.name)
-                    host.at_home.append(self.name)
+                    host.at_home.add(self.name)
                     await self.game.gm_channel.send(f"*** Cupid: {self.name} is sleeping at {name}'s.")
                 else:
                     await self.game.gm_channel.send(f"*** Cupid: {self.name} failed to sleep at {name} because cupid was not at home.")
