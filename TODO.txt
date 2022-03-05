@@ -27,12 +27,16 @@ Possibilities:
 - Have mutilation mute a player in voice (and text?)
   - on status update check if they unmuted themselves, then remute them
 - Custom death texts for each role
+  - picky werewolf:
+    "In his death throes they begin to change. His limbs lengthen, his fingers become wicked claws, and his eyes become starry, far seeing and endless. In an instant it is over, and all that hangs before you is a dead wolf. But it is clear to all that the {} is no more.. "
+
 - mute players during night
 - Automatic checks on whether all roles have performed their actions for a certain gs?
 - timer on voting
 
 
 Questions:
+- lynch voting in public or private channel
 - does the elder protect against mutilation by the wolves
 
  

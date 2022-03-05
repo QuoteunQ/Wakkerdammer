@@ -300,6 +300,8 @@ class WwGame():
                     lynch_votes[player.lynch_vote] += 1
                     player.lynch_vote = ''
 
+            await self.town_square.send(f"Lynch votes: {lynch_votes}")
+
             if max(lynch_votes.values()) == 0:
                 await self.gm_channel.send("*** Lynching: no votes were cast, no lynch target")
                 await self.town_square.send("No votes were cast, which means no one will get the noose today.")
@@ -311,12 +313,15 @@ class WwGame():
                 else:
                     target = self.player_names_objs[max(lynch_votes, key=lynch_votes.get)]
                     await self.gm_channel.send(f"*** Lynching: {target.name} is the lynch target")
-                    await self.town_square.send(f"{target.name} is the lynch target")
                     if target.role == 'fool' and target.fool_prot:
                         target.fool_prot = False
                         await self.gm_channel.send(f"*** Lynching: {target.name} survived the lynch because they are the fool.")
                         await self.town_square.send("No one will be lynched today.")
                     else:
+                        await self.town_square.send(f"The result is damning, and even before the final ballot is cast, {target.name} "
+                            "realises their mistake and begins to run. But they are caught and dragged to the hanging tree. "
+                            "They are strung up and summarily executed with little ceremony on suspicion of lycanthropy. "
+                            "The village watches silently as they hang.")
                         await target.die()
                     
             if self.gamestate != 'day: hunter':     # if no hunter died
