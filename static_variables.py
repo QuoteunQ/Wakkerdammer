@@ -10,7 +10,7 @@ possible_roles = {'werewolf', 'picky_werewolf', 'cupid', 'kidnapper', 'protector
 # gamestates: 'setup', 'end of day', 'night: pre-wolves', 'night: wolves', 'night: witch', 'day: hunter', 'day: discussion', 'day: voting', 'finished'
 
 known_commands = {
-    '$hello', '$inspire', '$help', '$allroles',                                                     # commands not influencing a game
+    '$hello', '$inspire', '$help', '$allroles',                                                     # non-game specific commands
     '$gamesetup', '$join', '$leave',                                                                # game setup
     '$kidnap', '$protect', '$shoot', '$lovers', '$sleepat', '$pick', '$lunch', '$potion',           # player commands
     '$lynch',

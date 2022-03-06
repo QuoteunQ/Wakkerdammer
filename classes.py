@@ -283,7 +283,7 @@ class WwGame():
             await self.gm_channel.send(f"The game is unable to move to day: voting during this state of the game ({self.gamestate}).")
         else:
             self.gamestate = 'day: voting'
-            await self.town_square.send("Time to vote who you want to lynch! When you've made your choice, type $lynch <player_name>")
+            await self.town_square.send("Time to vote who you want to lynch! When you've made your choice, type $lynch <player_name> in your personal channel.")
             await self.gm_channel.send("If you feel some players take too long voting, you can use $endvoting to force the game to advance.")
 
         
@@ -397,16 +397,22 @@ class WwGame():
 
     async def valid_target(self, msg: discord.Message, req_role: str, req_gs: str, req_target_count: int =1) -> bool:
         """Performs all general checks to make sure a command message containing a (player) target is valid. This includes:
-           - Is the message author alive (not applicable if hunter)
-           - Was the right channel used for the command and does the author have the required role for the command. The <req_role> input is a role string which determines this.
-             'wolf' and 'civilian' are used to denote messages that should originate from the wolf channel and town_square, respectively.
+           - Is the message author in the game and alive (latter not applicable if hunter)
+           - Was the right channel used for the command and does the author have the required role for the command. The <req_role> input
+             is a role string which determines this.
+             Special cases: 'wolf' is used to denote messages that should originate from the wolf channel;
+             'civilian' means the message should have come from the player's personal channel, but doesn't require a role check.
            - Was the message sent during the right gamestate (given by req_gs)
            - Are the targets alive players
            - Was the right amount of targets provided
            If not, the appropriate message is sent to the channel the message originated from.
            Message should take the form of '$command target1 target2 ...'
            Returns boolean."""
-        if req_role != 'hunter':
+        if req_role == 'hunter':
+            if msg.author.display_name not in self.lobby:
+                await msg.channel.send("You're not even in the game bruh")
+                return False
+        else:
             if msg.author.display_name not in self.alive:
                 await msg.channel.send("You're not even in the game and alive bruh")
                 return False
@@ -415,22 +421,16 @@ class WwGame():
             if msg.channel.id != self.wolf_channel.id:
                 await msg.channel.send("Yeah that's not the right channel for this mate")
                 return False
-
-        elif req_role == 'civilian':
-            if msg.channel.id != self.town_square.id:
-                await msg.channel.send("Yeah that's not the right channel for this mate")
-                return False
-
         else:
             player = self.player_names_objs[msg.author.display_name]
-            if player.role != req_role:
-                # Still send the 'wrong channel' msg to avoid giving away role info to other players. The msg will have come from a wrong channel anyhow
-                await msg.channel.send("Yeah that's not the right channel for this mate")
-                return False
-            else:
-                if msg.channel.id != player.role_channel.id:
+            if req_role != 'civilian':
+                if player.role != req_role:
+                    # Still send the 'wrong channel' msg to avoid giving away role info to other players. The msg will have come from a wrong channel anyhow
                     await msg.channel.send("Yeah that's not the right channel for this mate")
                     return False
+            if msg.channel.id != player.role_channel.id:
+                await msg.channel.send("Yeah that's not the right channel for this mate")
+                return False
 
         if self.gamestate != req_gs:
             await msg.channel.send("We're not currently in the right phase of the game for you to do that.")
@@ -458,7 +458,11 @@ class WwGame():
         """Called on every player death. Checks whether one of the win conditions for the game has been met. These include:
         all remaining players are wolves, there are no more wolves left, the remaining players are a civilian-wolf couple."""
         if not self.gamestate == 'finished':
-            if self.wolves == self.alive:
+            if len(self.alive) == 0:
+                self.gamestate = 'finished'
+                await self.town_square.send("The town stands quiet, not a soul in sight. It has become a ghost town, and will always remain so.\n"
+                    "Everyone has died, which means the game is now finished!")
+            elif self.wolves == self.alive:
                 self.gamestate = 'finished'
                 await self.town_square.send("With the last innocent civilian hunted and devoured, the werewolves have conquered this town for themselves."
                     "People say that howls echo among the buildings every night now, but who's to say they haven't moved on to the next town?\n"
@@ -473,10 +477,7 @@ class WwGame():
                 await self.town_square.send("Love conquers all, even when one has lycanthropy, and has been secretly devouring their and "
                     "their lover's own neighbours every night.\n"
                     "The lovers have won this game together!")
-            elif len(self.alive) == 0:
-                self.gamestate = 'finished'
-                await self.town_square.send("The town stands quiet, not a soul in sight. It has become a ghost town, and will always remain so.\n"
-                    "Everyone has died, which means the game is now finished!")
+    
 
 # ----------------- Role classes -------------------------------
 class Player():

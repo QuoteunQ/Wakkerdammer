@@ -23,7 +23,9 @@ At some point:
 - $remove to remove a player by the gm; same effect as $quit
 - GM can't use $join; maybe add debug mode where this isn't the case?
 
+
 Possibilities:
+
 - Have mutilation mute a player in voice (and text?)
   - on status update check if they unmuted themselves, then remute them
 - Custom death texts for each role
