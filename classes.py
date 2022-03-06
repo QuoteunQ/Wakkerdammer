@@ -149,7 +149,7 @@ class WwGame():
             self.gamestate = 'night: wolves'
             await self.gm_channel.send("Moving on to the wolves..."
                 "(If you feel they are taking too much time voting you can use $endwolves to force the game to advance.)")
-            await self.wolf_channel.send("It's your turn to vote for tonight's kill now!")
+            await self.wolf_channel.send("It's your turn to vote for tonight's target now!")
             await self.town_square.send("It's now the wolves' turn to select a target...")
 
 
@@ -295,7 +295,7 @@ class WwGame():
         if self.gamestate != 'day: voting':
             self.gm_channel.send(f"The game is unable to calculate the lynch kill during this state of the game ({self.gamestate}).")
         else:
-            lynch_votes = {self.player_names_objs[voter] : self.player_names_objs[voter].lynch_vote for voter in self.alive}
+            lynch_votes = {voter : self.player_names_objs[voter].lynch_vote for voter in self.alive}
             await self.town_square.send(f"Lynch votes: {lynch_votes}")
 
             vote_counts = {name : 0 for name in self.alive}
