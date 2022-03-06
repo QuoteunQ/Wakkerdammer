@@ -130,8 +130,10 @@ class WwGame():
                 f"The gamestate is now {self.gamestate}\n"
                 "Please carry out your roles by interacting in your private channel(s) and good luck! :^)")
             await self.gm_channel.send(
+                f"Beginning night {self.night_count}...\n"
+                f"The gamestate is now {self.gamestate}\n"
                 "Please check if all roles which should act before the wolves have performed their respective actions.\n"
-                f"To move the game to night: wolves, use $startwolves")
+                "To move the game to night: wolves, use $startwolves")
 
             for role in {'kidnapper', 'cupid', 'protector', 'seer', 'picky werewolf'}:
                 if role in self.roles:
@@ -236,7 +238,7 @@ class WwGame():
             else:
                 await self.town_square.send("Everyone wakes up to a calm morning.")
 
-            if self.gamestate != 'day: hunter':     # if no hunter died
+            if self.gamestate not in {'day: hunter', 'finished'}:     # if no hunter died
                 await self.start_day_discussion()
 
             for name in self.alive:
@@ -293,26 +295,28 @@ class WwGame():
         if self.gamestate != 'day: voting':
             self.gm_channel.send(f"The game is unable to calculate the lynch kill during this state of the game ({self.gamestate}).")
         else:
-            lynch_votes = {name : 0 for name in self.alive}
+            lynch_votes = {self.player_names_objs[voter] : self.player_names_objs[voter].lynch_vote for voter in self.alive}
+            await self.town_square.send(f"Lynch votes: {lynch_votes}")
+
+            vote_counts = {name : 0 for name in self.alive}
             for player_name in self.alive:
                 player = self.player_names_objs[player_name]
                 if player.lynch_vote != '':                # if they have actually voted
-                    lynch_votes[player.lynch_vote] += 1
+                    vote_counts[player.lynch_vote] += 1
                     player.lynch_vote = ''
 
-            await self.town_square.send(f"Lynch votes: {lynch_votes}")
-
-            if max(lynch_votes.values()) == 0:
+            if max(vote_counts.values()) == 0:
                 await self.gm_channel.send("*** Lynching: no votes were cast, no lynch target")
                 await self.town_square.send("No votes were cast, which means no one will get the noose today.")
             else:
                 # stalemate:
-                if list(lynch_votes.values()).count(max(lynch_votes.values())) > 1:
+                if list(vote_counts.values()).count(max(vote_counts.values())) > 1:
                     await self.gm_channel.send("*** Lynching: Stalemate in voting, no lynch target")
                     await self.town_square.send("Stalemate in voting, which means no one will get the noose today.")
                 else:
-                    target = self.player_names_objs[max(lynch_votes, key=lynch_votes.get)]
+                    target = self.player_names_objs[max(vote_counts, key=vote_counts.get)]
                     await self.gm_channel.send(f"*** Lynching: {target.name} is the lynch target")
+                    await self.town_square.send(f"{target.name} is the lynch target")
                     if target.role == 'fool' and target.fool_prot:
                         target.fool_prot = False
                         await self.gm_channel.send(f"*** Lynching: {target.name} survived the lynch because they are the fool.")
@@ -324,7 +328,7 @@ class WwGame():
                             "The village watches silently as they hang.")
                         await target.die()
                     
-            if self.gamestate != 'day: hunter':     # if no hunter died
+            if self.gamestate not in {'day: hunter', 'finished'}:
                 await self.end_day()
 
 
@@ -538,9 +542,7 @@ class Player():
             target = msg.content.split(' ')[1]
             self.lynch_vote = target
             vote_count = len([self.game.player_names_objs[player].lynch_vote for player in self.game.alive if self.game.player_names_objs[player].lynch_vote != ''])
-            day_vote_msg = f"*** Lynch: {self.name} has voted to lynch {target}. {vote_count}/{len(self.game.alive)} players have voted."
-            await self.game.town_square.send(day_vote_msg)
-            await self.game.gm_channel.send(day_vote_msg)
+            await self.game.gm_channel.send(f"*** Lynch: {self.name} has voted to lynch {target}. {vote_count}/{len(self.game.alive)} players have voted.")
             if vote_count == len(self.game.alive):
                 await self.game.town_square.send("All players have voted, calculating target now...")
                 await self.game.end_day_vote()
@@ -612,7 +614,7 @@ class Hunter(Player):
                 await self.game.town_square.send(f"{self.name} has decided to shoot {name}")
                 await target.die()
                 self.loaded = False
-                if len([1 for hunter in self.game.player_roles_objs['hunter'] if hunter.loaded]) == 0:
+                if len([1 for hunter in self.game.player_roles_objs['hunter'] if hunter.loaded]) == 0 and self.game.gamestate != 'finished':
                     await self.game.end_hunter_hour()
             else:
                 await self.role_channel.send("You've already fired your gun, quit trying to shoot everyone!")
