@@ -891,5 +891,6 @@ role_switch_dict = {    # works like a factory for making the player objects in 
     'protector':        lambda game, name: Protector(game, name),
     'witch':            lambda game, name: Witch(game, name),
     'elder':            lambda game, name: Elder(game, name),
-    'fool':             lambda game, name: Fool(game, name)
+    'fool':             lambda game, name: Fool(game, name),
+    'seer':             lambda game, name: Seer(game, name)
 }
