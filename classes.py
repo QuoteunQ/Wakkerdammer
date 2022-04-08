@@ -1,5 +1,6 @@
 import discord
 import random
+import asyncio
 from static_variables import client, min_players, possible_roles, topics
 
 
@@ -58,18 +59,49 @@ class WwGame():
 
     
     async def leave(self, msg: discord.Message):
-        """Called when a player types $leave, takes the command message as input. Lets the player leave the lobby for the game if it is in setup phase."""
-        if self.gamestate != 'setup':
-            await msg.channel.send("No game setup taking place")
-        else:
-            name = msg.author.display_name
-            if name in self.lobby:
+        """Called when a player types $leave, takes the command message as input. If the game is in setup phase, lets the player leave the lobby.
+            If the game is in progress, the client will ask for confirmation; if given, the player will be killed and removed from the game."""
+        name = msg.author.display_name
+        if self.gamestate == 'setup':
+            if name not in self.lobby:
+                await msg.channel.send("No need, you weren't even in the game yet!")
+            else:
                 self.lobby.remove(name)
                 del self.ids[name]
                 print(f"{name} has left the game, playercount now at {len(self.lobby)}")
                 await self.town_square.send(f"{name} has left the game, playercount now at {len(self.lobby)}")
+        else:
+            if name not in self.alive:
+                await msg.channel.send("Since you're not currently (alive) in this game, you can safely leave!")
             else:
-                await msg.channel.send("No need, you weren't even in the game yet!")
+                await msg.channel.send("Are you sure? If you leave in the middle of a game, you will be killed. Type $yes to confirm, or $no to cancel.")
+
+                def check(mssg):
+                    return mssg.content in {'$yes', '$no'} and mssg.author.display_name == name
+
+                try:
+                    conf_msg = await client.wait_for('message', check=check, timeout=30.0)
+                    if conf_msg.content == '$yes':
+                        player = self.player_names_objs[name]
+
+                        # Kill the quitting player, but bypass killing possible lovers and/or hunter activation
+                        player.is_alive = False
+                        self.dead.add(name)
+                        self.alive.remove(name)
+
+                        if player.wolf:
+                            self.wolves.remove(name)
+
+                        if player.role not in {'werewolf', 'picky_werewolf'} and player.wolf:
+                            await self.town_square.send(f"{name} died, they were the {player.role}, and they were the picked werewolf.")
+                        else:
+                            await self.town_square.send(f"{name} died, they were the {player.role}.")
+
+                        await self.check_win_cond()
+                    else:
+                        await msg.channel.send("Alright, we'll continue playing as normal then.")
+                except asyncio.TimeoutError:
+                    await msg.channel.send("The program timed out waiting for your reply, so you will stay in the game for now.")
 
 
     async def changesetting(self, msg: discord.Message):
