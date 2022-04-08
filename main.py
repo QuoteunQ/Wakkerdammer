@@ -150,6 +150,11 @@ async def on_message(message: discord.Message):
         if await game.valid_target(message, req_role='cupid', req_gs='night: pre-wolves'):
             await game.player_names_objs[message.author.display_name].sleep_at(message)
         return
+    
+    if message.content.startswith('$divine'):
+        if await game.valid_target(message, req_role='seer', req_gs='night: pre-wolves'):
+            await game.player_names_objs[message.author.display_name].divine(message)
+        return
 
     if message.content.startswith('$shoot'):
         if await game.valid_target(message, req_role='hunter', req_gs='day: hunter'):
@@ -176,6 +181,7 @@ async def on_message(message: discord.Message):
     if message.content.startswith('$lynch'):
         if await game.valid_target(message, req_role='civilian', req_gs='day: voting'):
             await game.player_names_objs[message.author.display_name].day_vote(message)
+        return
 
 
     # ----------------------- Commands which can only be used by the gamemaster ------------------------------------

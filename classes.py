@@ -78,8 +78,11 @@ class WwGame():
             await msg.channel.send("You can't change a setting outside of game setup.")
         else:
             setting = msg.content.split(' ')[1]
-            self.settings[setting] = not self.settings[setting]
-            await msg.channel.send(f"The setting {setting} has been changed to {self.settings[setting]}.")
+            if setting not in self.settings.keys():
+                await msg.channel.send(f"The setting {setting} was not recognised.")
+            else:
+                self.settings[setting] = not self.settings[setting]
+                await msg.channel.send(f"The setting {setting} has been changed to {self.settings[setting]}.")
 
 
         # -------------------------------- Gamestate flow control functions ---------------------------------------------------
@@ -769,6 +772,24 @@ class Protector(Player):
                 target.house_prot = True
                 await self.role_channel.send(f"You have protected {name}'s house.")
                 await self.game.gm_channel.send(f"*** Protector: {self.name} has protected {name}'s house.")
+
+
+class Seer(Player):
+    def __init__(self, game: WwGame, name: str):
+        super().__init__(game, name)
+        self.role = 'seer'
+
+    async def divine(self, msg: discord.Message):
+        """Given a $divine command message, reveal the role of the player given by the name in the message to the author."""
+        if self.role_performed:
+            await self.role_channel.send("You've already viewed someone's role tonight.")
+        elif name == self.name:
+            await self.role_channel.send("You can't choose yourself!")
+        else:
+            name = msg.content.split(' ')[1]
+            target = self.game.player_names_objs[name]
+            await self.role_channel.send(f"{name}'s role is {target.role}.")
+            await self.game.gm_channel.send(f"*** Seer: {self.name} has viewed {name}'s role.")
 
 
 class Witch(Player):

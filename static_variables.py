@@ -13,7 +13,7 @@ known_commands = {
     '$hello', '$inspire', '$help', '$allroles',                                                     # non-game specific commands
     '$gamesetup', '$join', '$leave',                                                                # game setup
     '$kidnap', '$protect', '$shoot', '$lovers', '$sleepat', '$pick', '$lunch', '$potion',           # player commands
-    '$lynch',
+    '$lynch', '$divine',
     '$playerlist', '$poopbreak', '$roles', '$gamestate', '$gm', '$alive', '$settings',              # utility commands
     '$clearplayerlist', '$changesetting', '$gamestart', '$gamereset',                               # game control gamemaster
     '$beginnight', '$startwolves', '$endwolves', '$endnight', '$endhunter',                         # gamestate flow control gamemaster
@@ -37,7 +37,7 @@ topics = {
         "You can vote for someone during days using $lynch <player name>. "
         "For questions please @ the gamemaster. Type $help to see other commands.",
     'seer':
-        "- You are the seer! During nights type $lookat <player name> to obtain that person's role. "
+        "- You are the seer! During nights type $divine <player name> to obtain that person's role. "
         "You can vote for someone during days using $lynch <player name>. "
         "For questions please @ the gamemaster. Type $help to see other commands.",
     'witch':

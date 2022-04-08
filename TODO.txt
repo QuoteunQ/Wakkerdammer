@@ -10,9 +10,6 @@ Keep track of:
 
 Soon:
 
-- Seer
-  - Check that seer can't target themselves
-
 
 At some point:
 
@@ -38,7 +35,6 @@ Possibilities:
 
 
 Questions:
-- lynch voting in public or private channel
 - does the elder protect against mutilation by the wolves
 
  
