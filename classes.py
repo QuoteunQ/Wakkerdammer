@@ -827,13 +827,14 @@ class Seer(Player):
         """Given a $divine command message, reveal the role of the player given by the name in the message to the author."""
         if self.role_performed:
             await self.role_channel.send("You've already viewed someone's role tonight.")
-        elif name == self.name:
-            await self.role_channel.send("You can't choose yourself!")
         else:
             name = msg.content.split(' ')[1]
-            target = self.game.player_names_objs[name]
-            await self.role_channel.send(f"{name}'s role is {target.role}.")
-            await self.game.gm_channel.send(f"*** Seer: {self.name} has viewed {name}'s role.")
+            if name == self.name:
+                await self.role_channel.send("You can't choose yourself!")
+            else:
+                target = self.game.player_names_objs[name]
+                await self.role_channel.send(f"{name}'s role is {target.role}.")
+                await self.game.gm_channel.send(f"*** Seer: {self.name} has viewed {name}'s role.")
 
 
 class Witch(Player):
