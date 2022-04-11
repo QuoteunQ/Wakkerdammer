@@ -15,7 +15,7 @@ known_commands = {
     '$kidnap', '$protect', '$shoot', '$lovers', '$sleepat', '$pick', '$lunch', '$potion',           # player commands
     '$lynch', '$divine',
     '$playerlist', '$poopbreak', '$roles', '$gamestate', '$gm', '$alive', '$settings',              # utility commands
-    '$clearplayerlist', '$changesetting', '$gamestart', '$gamereset',                               # game control gamemaster
+    '$remove', '$clearplayerlist', '$changesetting', '$gamestart', '$gamereset',                    # game control gamemaster
     '$beginnight', '$startwolves', '$endwolves', '$endnight', '$endhunter',                         # gamestate flow control gamemaster
     '$startvoting', '$endvoting'
 }

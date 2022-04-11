@@ -58,50 +58,62 @@ class WwGame():
                     await self.town_square.send(f"{name} has joined the game, playercount now at {len(self.lobby)}")
 
     
-    async def leave(self, msg: discord.Message):
-        """Called when a player types $leave, takes the command message as input. If the game is in setup phase, lets the player leave the lobby.
-            If the game is in progress, the client will ask for confirmation; if given, the player will be killed and removed from the game."""
-        name = msg.author.display_name
-        if self.gamestate == 'setup':
-            if name not in self.lobby:
-                await msg.channel.send("No need, you weren't even in the game yet!")
+    async def remove_player(self, msg: discord.Message):
+        """Called on a $leave request by a player or a $remove command by the gamemaster, the latter also containing the names of the players to be removed.
+            Takes the command message as input. If the game is in setup phase, removes the player(s) from the lobby. If the game is in progress, the client will
+            ask for confirmation; if given, the player(s) will be killed and removed from the game."""
+        if msg.content.startswith('$leave'):
+            names = [msg.author.display_name]
+        elif msg.content.startswith('$remove'):
+            msg_contents = msg.content.split(' ')
+            if len(msg_contents) < 2:
+                await msg.channel.send("You didn't provide any player names to be removed, please try again.")
+                return
+            names = msg_contents[1:]
+        
+        for name in names:
+            if self.gamestate == 'setup':
+                if name not in self.lobby:
+                    await msg.channel.send(f"{name} wasn't even in the lobby for this game yet.")
+                    continue
+                else:
+                    self.lobby.remove(name)
+                    del self.ids[name]
+                    print(f"{name} has left the game, playercount now at {len(self.lobby)}")
+                    await self.town_square.send(f"{name} has left the game, playercount now at {len(self.lobby)}")
             else:
-                self.lobby.remove(name)
-                del self.ids[name]
-                print(f"{name} has left the game, playercount now at {len(self.lobby)}")
-                await self.town_square.send(f"{name} has left the game, playercount now at {len(self.lobby)}")
-        else:
-            if name not in self.alive:
-                await msg.channel.send("Since you're not currently (alive) in this game, you can safely leave!")
-            else:
-                await msg.channel.send("Are you sure? If you leave in the middle of a game, you will be killed. Type $yes to confirm, or $no to cancel.")
+                if name not in self.alive:
+                    await msg.channel.send(f"{name} is not currently (alive) in this game, so them leaving has no impact.")
+                    continue
+                else:
+                    await msg.channel.send("Are you sure? If a player is removed in the middle of a game, they will be killed. Type $yes to confirm, or $no to cancel.")
 
-                def check(mssg):
-                    return mssg.content in {'$yes', '$no'} and mssg.author.display_name == name
+                    def check(mssg):
+                        return mssg.content in {'$yes', '$no'} and mssg.author == msg.author
 
-                try:
-                    conf_msg = await client.wait_for('message', check=check, timeout=30.0)
-                    if conf_msg.content == '$yes':
-                        player = self.player_names_objs[name]
+                    try:
+                        conf_msg = await client.wait_for('message', check=check, timeout=30.0)
+                        if conf_msg.content == '$yes':
+                            player = self.player_names_objs[name]
 
-                        # Kill the quitting player, but bypass killing possible lovers and/or hunter activation
-                        player.is_alive = False
-                        self.dead.add(name)
-                        self.alive.remove(name)
+                            # Kill the quitting player, but bypass killing possible lovers and/or hunter activation
+                            player.is_alive = False
+                            self.dead.add(name)
+                            self.alive.remove(name)
 
-                        if player.wolf:
-                            self.wolves.remove(name)
+                            if player.wolf:
+                                self.wolves.remove(name)
 
-                        if player.role not in {'werewolf', 'picky_werewolf'} and player.wolf:
-                            await self.town_square.send(f"{name} died, they were the {player.role}, and they were the picked werewolf.")
+                            if player.role not in {'werewolf', 'picky_werewolf'} and player.wolf:
+                                await self.town_square.send(f"{name} died, they were the {player.role}, and they were the picked werewolf.")
+                            else:
+                                await self.town_square.send(f"{name} died, they were the {player.role}.")
+
+                            await self.check_win_cond()
                         else:
-                            await self.town_square.send(f"{name} died, they were the {player.role}.")
-
-                        await self.check_win_cond()
-                    else:
-                        await msg.channel.send("Alright, we'll continue playing as normal then.")
-                except asyncio.TimeoutError:
-                    await msg.channel.send("The program timed out waiting for your reply, so you will stay in the game for now.")
+                            await msg.channel.send("Alright, we'll continue playing as normal then.")
+                    except asyncio.TimeoutError:
+                        await msg.channel.send("The program timed out waiting for your reply, so nothing will change for now.")
 
 
     async def changesetting(self, msg: discord.Message):

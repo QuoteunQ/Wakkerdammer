@@ -16,8 +16,6 @@ At some point:
 - dead people gc
 - on_member_update() to keep track of nickname changes; space in nickname should be prevented, unique nicknames should be required
 - on_user_update() to keep track of username changes
-- in $leave : if in the middle of a game: “are you sure? This will kill you. If so, use $quit”
-- $remove to remove a player by the gm; same effect as $quit
 - GM can't use $join; maybe add debug mode where this isn't the case?
 
 
