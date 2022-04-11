@@ -2,9 +2,8 @@ import os
 import discord
 import requests
 import json
-from textwrap import dedent
 from classes import WwGame
-from static_variables import client, min_players, possible_roles, gskey, known_commands
+from static_variables import client, min_players, possible_roles, known_commands, topics
 
 
 games: 'dict[int, WwGame]' = {}                  # dict with < guild_id : game object >
@@ -61,16 +60,12 @@ async def on_message(message: discord.Message):
                 town_square_channel = await message.guild.create_text_channel(name='town_square')
                 await town_square_channel.send("I've created this channel for all non-secret communication about the game.")
             new_game = WwGame(message.guild, message.author)
-            overwritesgm = {
+            overwrites_gm = {
                 message.guild.default_role: discord.PermissionOverwrite(read_messages=False),
                 message.author: discord.PermissionOverwrite(read_messages=True),
                 client.user: discord.PermissionOverwrite(read_messages=True)
             }
-            new_game.gm_channel = await message.guild.create_text_channel(name='gamemaster', overwrites=overwritesgm)
-            await new_game.gm_channel.send(
-                "In this channel you as gamemaster will see updates about what's happening in the game.\n"
-                "You can also use it to start the game without revealing the roles in the game to the players."
-            )
+            new_game.gm_channel = await message.guild.create_text_channel(name='gamemaster', overwrites=overwrites_gm, topic=topics['gamemaster'])
             print(f"The gamemaster is {new_game.gm.display_name}")
             await town_square_channel.send(
                 "Starting game setup...\n"
@@ -92,62 +87,7 @@ async def on_message(message: discord.Message):
     game = games[message.guild.id]
 
 
-# ------------------------------------ Game join & leave ------------------------------------------
-
-    if message.content.startswith('$join'):
-        await game.join(message)
-        return
-
-    if message.content.startswith('$leave'):
-        await game.leave(message)
-        return
-
-
-# ---------------------------- Night Commands Players -----------------------------------
-
-    if message.content.startswith('$kidnap'):
-        if await game.valid_target(message, req_role='kidnapper', req_gs=2):
-            await game.player_names_objs[message.author.display_name].kidnap(message)
-        return
-    
-    if message.content.startswith('$protect'):
-        if await game.valid_target(message, req_role='protector', req_gs=2):
-            await game.player_names_objs[message.author.display_name].protect(message)
-        return
-
-    if message.content.startswith('$lovers'):
-        if await game.valid_target(message, req_role='cupid', req_gs=2, req_target_count=2):
-            await game.player_names_objs[message.author.display_name].make_lovers(message)
-        return
-
-    if message.content.startswith('$sleepat'):
-        if await game.valid_target(message, req_role='cupid', req_gs=2):
-            await game.player_names_objs[message.author.display_name].sleep_at(message)
-        return
-
-    if message.content.startswith('$hunt'):
-        if await game.valid_target(message, req_role='hunter', req_gs=5):
-            await game.player_names_objs[message.author.display_name].hunt(message)
-        return
-
-    if message.content.startswith('$pick'):
-        if await game.valid_target(message, req_role='picky_werewolf', req_gs=2):
-            await game.player_names_objs[message.author.display_name].pick_wolf(message)
-        return
-
-    if message.content.startswith('$lunch'):
-        if await game.valid_target(message, req_role='wolf', req_gs=3):
-            await game.player_names_objs[message.author.display_name].vote_lunch(message)
-        return
-
-    if message.content.startswith('$potion '):
-        message.content = message.content[8:]       # split off the '$potion ' part to make valid_target and use_potion handle the message as 'heal/kill/mute target_name'
-        if await game.valid_target(message, req_role='witch', req_gs=4):
-            await game.player_names_objs[message.author.display_name].use_potion(message)
-        return
-
-
-# ------------------------------ Utility commands -------------------------------------
+    # ------------------------------ Utility commands -------------------------------------
 
     if message.content.startswith('$playerlist'):
         await message.channel.send(f"Players: {game.lobby}")
@@ -162,7 +102,7 @@ async def on_message(message: discord.Message):
         return
 
     if message.content.startswith('$gamestate'):
-        await message.channel.send(f"State of game: {gskey[game.gamestate]}")
+        await message.channel.send(f"State of game: {game.gamestate}")
         return
 
     if message.content.startswith('$gm'):
@@ -173,15 +113,85 @@ async def on_message(message: discord.Message):
         await message.channel.send(f"Alive players are: {game.alive}")
         return
 
+    if message.content.startswith('$settings'):
+        await message.channel.send(f"Settings for this game are {game.settings}")
+        return
 
-# ----------------------- Commands which can only be used by the gamemaster ------------------------------------
+
+    # ------------------------------------ Game join & leave ------------------------------------------
+
+    if message.content.startswith('$join'):
+        await game.join(message)
+        return
+
+    if message.content.startswith('$leave'):
+        await game.remove_player(message)
+        return
+
+
+    # ---------------------------- Player commands ---------------------------------------------
+
+    if message.content.startswith('$kidnap'):
+        if await game.valid_target(message, req_role='kidnapper', req_gs='night: pre-wolves'):
+            await game.player_names_objs[message.author.display_name].kidnap(message)
+        return
+    
+    if message.content.startswith('$protect'):
+        if await game.valid_target(message, req_role='protector', req_gs='night: pre-wolves'):
+            await game.player_names_objs[message.author.display_name].protect(message)
+        return
+
+    if message.content.startswith('$lovers'):
+        if await game.valid_target(message, req_role='cupid', req_gs='night: pre-wolves', req_target_count=2):
+            await game.player_names_objs[message.author.display_name].make_lovers(message)
+        return
+
+    if message.content.startswith('$sleepat'):
+        if await game.valid_target(message, req_role='cupid', req_gs='night: pre-wolves'):
+            await game.player_names_objs[message.author.display_name].sleep_at(message)
+        return
+    
+    if message.content.startswith('$divine'):
+        if await game.valid_target(message, req_role='seer', req_gs='night: pre-wolves'):
+            await game.player_names_objs[message.author.display_name].divine(message)
+        return
+
+    if message.content.startswith('$shoot'):
+        if await game.valid_target(message, req_role='hunter', req_gs='day: hunter'):
+            await game.player_names_objs[message.author.display_name].hunt(message)
+        return
+
+    if message.content.startswith('$pick'):
+        if await game.valid_target(message, req_role='picky_werewolf', req_gs='night: pre-wolves'):
+            await game.player_names_objs[message.author.display_name].pick_wolf(message)
+        return
+
+    if message.content.startswith('$lunch'):
+        if await game.valid_target(message, req_role='wolf', req_gs='night: wolves'):
+            await game.player_names_objs[message.author.display_name].vote_lunch(message)
+        return
+
+    if message.content.startswith('$potion '):
+        # split off the '$potion ' part to make valid_target and use_potion handle the message as 'heal/kill/mute target_name'
+        message.content = message.content[8:]
+        if await game.valid_target(message, req_role='witch', req_gs='night: witch'):
+            await game.player_names_objs[message.author.display_name].use_potion(message)
+        return
+
+    if message.content.startswith('$lynch'):
+        if await game.valid_target(message, req_role='civilian', req_gs='day: voting'):
+            await game.player_names_objs[message.author.display_name].day_vote(message)
+        return
+
+
+    # ----------------------- Commands which can only be used by the gamemaster ------------------------------------
 
     if message.author != game.gm:
         await message.channel.send("Relax bro you're not the GM")
         return
 
     if message.content.startswith('$clearplayerlist'):
-        if game.gamestate == 0:
+        if game.gamestate == 'setup':
             game.lobby = []
             game.ids = {}
             await message.channel.send("Player list is now empty")
@@ -189,12 +199,20 @@ async def on_message(message: discord.Message):
             await message.channel.send("You can't do that outside of game setup")
         return
 
+    if message.content.startswith('$remove'):
+        await game.remove_player(message)
+        return
+
+    if message.content.startswith('$changesetting'):
+        await game.changesetting(message)
+        return
+
     if message.content.startswith('$gamestart'):
         await game.start(message)
         return
 
     if message.content.startswith('$gamereset'):
-        print(f"Guild {message.guild.id} is resetting their game.")
+        print(f"Guild {message.guild.name} is resetting their game.")
         await game.delete_channels()
         town_square_channel = game.town_square
         del games[message.guild.id]
@@ -220,6 +238,14 @@ async def on_message(message: discord.Message):
 
     if message.content.startswith('$endhunter'):
         await game.end_hunter_hour()
+        return
+    
+    if message.content.startswith('$startvoting'):
+        await game.start_day_vote()
+        return
+
+    if message.content.startswith('$endvoting'):
+        await game.end_day_vote()
         return
 
 

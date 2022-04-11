@@ -1,25 +1,13 @@
 Keep track of:
-- use display_name instead of nickname
 - gm channel msgs on role events
 - Every message needs a reply
 - send messages to roles telling them it’s their time to act
 - add all commands to known_commands
 - add new roles to role_switch_dict
+- write role instructions to topics
 
 
 Soon:
-
-
-Lynching
-- print statement and channel message in $lynch to make clear
-  how many players have voted
-
-- Win condition function; called on every death
-
-- check duplicate names in $join
-- check duplicate roles in $gamestart except for werewolf and civ
-
-- write role instructions to topics
 
 
 At some point:
@@ -27,27 +15,24 @@ At some point:
 - dead people gc
 - on_member_update() to keep track of nickname changes; space in nickname should be prevented, unique nicknames should be required
 - on_user_update() to keep track of username changes
-- if player is mutilated, on status update check if they unmuted themselves, then remute them
-- in $leave : if in the middle of a game: “are you sure? This will kill you. If so, use $quit”
-- $remove to remove a player by the gm; same effect as $quit
-- GM can't use $join
-- Custom death texts for each role
-
-Questions:
-- does the kidnapper kidnap just the target or everyone at the house (slut)
-
- 
-Edgecases:
-
-- Witch cannot heal a mutilation
-
-TOCHECK
-- GM end night before any ww votes
-- Pick after the vote is decided
-  - the picked tries to vote then? 
+- GM can't use $join; maybe add debug mode where this isn't the case?
 
 
 Possibilities:
+
+- Have mutilation mute a player in voice (and text?)
+  - on status update check if they unmuted themselves, then remute them
+- Custom death texts for each role
+  - picky werewolf:
+    "In his death throes they begin to change. His limbs lengthen, his fingers become wicked claws, and his eyes become starry, far seeing and endless. In an instant it is over, and all that hangs before you is a dead wolf. But it is clear to all that the {} is no more.. "
+
 - mute players during night
 - Automatic checks on whether all roles have performed their actions for a certain gs?
 - timer on voting
+
+
+Questions:
+- does the elder protect against mutilation by the wolves
+
+ 
+Edgecases:
