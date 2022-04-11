@@ -1,5 +1,4 @@
 Keep track of:
-- use display_name instead of nickname
 - gm channel msgs on role events
 - Every message needs a reply
 - send messages to roles telling them it’s their time to act

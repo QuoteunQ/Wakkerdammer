@@ -212,7 +212,7 @@ async def on_message(message: discord.Message):
         return
 
     if message.content.startswith('$gamereset'):
-        print(f"Guild {message.guild.id} is resetting their game.")
+        print(f"Guild {message.guild.name} is resetting their game.")
         await game.delete_channels()
         town_square_channel = game.town_square
         del games[message.guild.id]
